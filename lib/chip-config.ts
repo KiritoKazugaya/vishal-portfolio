@@ -11,8 +11,6 @@ export interface LayerDef {
   id: LayerId
   /** Chapter title shown alongside the layer. */
   label: string
-  /** Semiconductor name, shown as the technical caption. */
-  technical: string
   texture: string
   /** Edge length in world units. Lower layers are wider, as in a real package. */
   size: number
@@ -36,7 +34,6 @@ export const LAYERS: LayerDef[] = [
   {
     id: "package",
     label: "About",
-    technical: "Integrated heat spreader · package lid",
     texture: "/assets/chip/layer-top.webp",
     size: 4.0,
     thickness: 0.17,
@@ -47,7 +44,6 @@ export const LAYERS: LayerDef[] = [
   {
     id: "die",
     label: "Skills",
-    technical: "Silicon die · compute fabric",
     texture: "/assets/chip/layer-die.webp",
     size: 2.45,
     thickness: 0.1,
@@ -58,7 +54,6 @@ export const LAYERS: LayerDef[] = [
   {
     id: "interposer",
     label: "Projects",
-    technical: "Silicon interposer · die-to-package routing",
     texture: "/assets/chip/layer-interposer.webp",
     size: 3.5,
     thickness: 0.12,
@@ -69,7 +64,6 @@ export const LAYERS: LayerDef[] = [
   {
     id: "substrate",
     label: "Experience",
-    technical: "Package substrate · signal fan-out",
     texture: "/assets/chip/layer-substrate.webp",
     size: 4.0,
     thickness: 0.14,
@@ -80,7 +74,6 @@ export const LAYERS: LayerDef[] = [
   {
     id: "contacts",
     label: "Contact",
-    technical: "BGA solder-ball array · board interface",
     texture: "/assets/chip/layer-bga.webp",
     size: 4.15,
     thickness: 0.16,

@@ -39,10 +39,21 @@ export interface ArchitectureStep {
   detail: string
 }
 
+export type ProjectCategory = "AI / ML" | "Data" | "Full-Stack" | "Automation"
+
+/** GitHub-style language bar segment. */
+export interface Language {
+  name: string
+  pct: number
+  color: string
+}
+
 export interface Project {
   slug: string
   title: string
   tagline: string
+  category: ProjectCategory
+  languages: Language[]
   /** Featured projects render large in the bento grid. */
   featured?: boolean
   domain: string
@@ -74,6 +85,12 @@ export interface ExperienceItem {
   summary: string
   highlights: string[]
   tags: string[]
+  /** Accent for this org's card. */
+  accent: string
+  /** Shown on the reverse of the flip card. */
+  stats: Metric[]
+  /** Labelled bars on the reverse, 0-100. */
+  bars: Array<{ label: string; value: number }>
 }
 
 export interface SocialLink {

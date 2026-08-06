@@ -1,63 +1,52 @@
-import type { ReactNode } from "react"
+import type { CSSProperties, ReactNode } from "react"
 import { LAYERS, layerIndex } from "@/lib/chip-config"
 import type { LayerId } from "@/lib/types"
 
 interface Props {
   id: LayerId
   title: string
-  lead?: string
+  lead?: ReactNode
   children: ReactNode
-  /** Full-bleed chapters (Projects) opt out of the narrow reading column. */
-  wide?: boolean
+  /** Skip the scrim + heading chrome (Skills builds its own full-bleed stage). */
+  bare?: boolean
 }
 
 /**
  * A chapter of the page, bound to one chip layer.
  *
- * `data-layer` is what the scroll timeline looks for — that attribute is the
- * only coupling between the copy and the 3D scene.
+ * `data-layer` is the only coupling between the copy and the 3D scene, and the
+ * content sits in `.shell` — the same width the nav uses — so a chapter's left
+ * and right edges line up exactly with the wordmark and the résumé button.
  */
-export function Chapter({ id, title, lead, children, wide = false }: Props) {
+export function Chapter({ id, title, lead, children, bare = false }: Props) {
   const def = LAYERS[layerIndex(id)]
+  const style = { "--card-accent": def.accent } as CSSProperties
 
   return (
     <section
       id={id}
       data-layer={id}
       aria-labelledby={`${id}-heading`}
-      className="relative py-28 md:py-44"
+      className="relative py-24 md:py-36"
+      style={style}
     >
       <div className="shell">
-        {/*
-          Centred, not offset to one side: the camera parks on the opening
-          between this layer and the next, so the copy reads as sitting inside
-          the chip rather than beside it.
-        */}
-        <div
-          className={`chapter-scrim mx-auto ${wide ? "max-w-5xl" : "max-w-2xl"}`}
-        >
-          <div data-reveal className="mb-10">
+        <div className={bare ? "" : "chapter-scrim"}>
+          <div data-reveal className="mb-10 md:mb-14">
             <div className="mb-4 flex items-center gap-3">
               <span
-                className="h-px w-8 shrink-0"
+                className="h-px w-10 shrink-0"
                 style={{ background: def.accent }}
                 aria-hidden
               />
-              <span className="eyebrow">{def.technical}</span>
+              <span className="eyebrow">{def.label}</span>
             </div>
 
-            <h2
-              id={`${id}-heading`}
-              className="text-4xl font-semibold tracking-tight text-chalk md:text-5xl"
-            >
+            <h2 id={`${id}-heading`} className="h-chapter inlay">
               {title}
             </h2>
 
-            {lead ? (
-              <p className="mt-5 max-w-2xl text-base leading-relaxed text-mute md:text-lg">
-                {lead}
-              </p>
-            ) : null}
+            {lead ? <p className="body-lead mt-5 max-w-3xl">{lead}</p> : null}
           </div>
 
           {children}

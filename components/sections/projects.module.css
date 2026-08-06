@@ -1,0 +1,198 @@
+/*
+ * Projects — carousel rail, terminal-style filter rail, GitHub-style repo footer.
+ * Scoped to this section; nothing here leaks into globals.
+ */
+
+/* -------------------------------------------------------------------------- */
+/*  Filter rail                                                                */
+/*                                                                             */
+/*  Deliberately NOT the rounded pills the Skills section uses. Same job,       */
+/*  different instrument: a monospace, bracketed terminal rail with a sliding   */
+/*  gold underline, so scrolling from Skills to Projects does not feel like     */
+/*  the same control rendered twice.                                           */
+/* -------------------------------------------------------------------------- */
+
+.rail {
+  display: flex;
+  align-items: stretch;
+  gap: clamp(0.15rem, 1vw, 0.6rem);
+  overflow-x: auto;
+  padding-bottom: 2px;
+  border-bottom: 1px solid var(--color-edge);
+}
+
+.tab {
+  position: relative;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  padding: 0.55rem clamp(0.45rem, 1.2vw, 0.9rem) 0.7rem;
+  font-family: var(--font-mono);
+  font-size: clamp(0.66rem, 0.85vw, 0.78rem);
+  letter-spacing: 0.06em;
+  color: var(--color-faint);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.25s ease;
+}
+
+/* The sliding rule. Grows from the centre so it reads as a selector, not a link. */
+.tab::after {
+  content: "";
+  position: absolute;
+  left: clamp(0.45rem, 1.2vw, 0.9rem);
+  right: clamp(0.45rem, 1.2vw, 0.9rem);
+  bottom: -1px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #e0c377, #c7a24a, #8d6f30);
+  transform: scaleX(0);
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tab:hover {
+  color: var(--color-mute);
+}
+
+.tabOn {
+  color: var(--color-chalk);
+}
+
+.tabOn::after,
+.tab:hover::after {
+  transform: scaleX(1);
+}
+
+.tab:hover::after {
+  opacity: 0.4;
+}
+
+.tabOn::after {
+  opacity: 1;
+}
+
+.bracket {
+  color: var(--color-edge);
+  transition: color 0.25s ease;
+}
+
+.tab:hover .bracket,
+.tabOn .bracket {
+  color: var(--accent-gold);
+}
+
+.count {
+  font-size: 0.72em;
+  color: var(--color-faint);
+  opacity: 0.75;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tab,
+  .tab::after,
+  .bracket {
+    transition: none;
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Carousel                                                                   */
+/* -------------------------------------------------------------------------- */
+
+.viewport {
+  /* Cards dissolve at the rail edges instead of being guillotined by overflow. */
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    #000 2.5%,
+    #000 97.5%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    #000 2.5%,
+    #000 97.5%,
+    transparent 100%
+  );
+}
+
+.track {
+  display: flex;
+  align-items: stretch;
+  gap: clamp(0.75rem, 1.4vw, 1.25rem);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline-start: 2px;
+  /* Vertical room so the hover lift and its drop shadow are not clipped. */
+  padding: 0.75rem 2px 1.5rem;
+}
+
+.card {
+  flex: 0 0 auto;
+  width: clamp(15.5rem, 26vw, 22rem);
+  max-width: 100%;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  padding: clamp(1rem, 1.5vw, 1.35rem);
+  cursor: pointer;
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Repo footer                                                                */
+/* -------------------------------------------------------------------------- */
+
+.langBar {
+  display: flex;
+  height: 7px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--color-edge);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.langSeg {
+  height: 100%;
+  min-width: 3px;
+  transition: filter 0.3s ease;
+}
+
+.card:hover .langSeg {
+  filter: brightness(1.22) saturate(1.15);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  flex: 0 0 auto;
+  box-shadow: 0 0 6px -1px currentColor;
+}
+
+/* One tick per real architecture stage — derived from the case study, not invented. */
+.ticks {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 11px;
+}
+
+.tick {
+  width: 3px;
+  border-radius: 1px;
+  background: color-mix(in oklab, var(--card-accent, var(--accent-cyan)) 55%, transparent);
+  transition: height 0.3s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .langSeg,
+  .tick {
+    transition: none;
+  }
+}

@@ -1,8 +1,10 @@
 import { Github, Linkedin, Mail, Phone } from "@/components/ui/brand-icons"
 import type {
   ExperienceItem,
+  Language,
   NavItem,
   Project,
+  ProjectCategory,
   SkillGroup,
   SocialLink,
 } from "./types"
@@ -158,7 +160,9 @@ export const skillGroups: SkillGroup[] = [
 /*  Projects                                                                   */
 /* -------------------------------------------------------------------------- */
 
-export const projects: Project[] = [
+type RawProject = Omit<Project, "category" | "languages">
+
+const RAW_PROJECTS: RawProject[] = [
   {
     slug: "enterprise-rag-assistant",
     title: "Enterprise Knowledge Assistant",
@@ -302,15 +306,15 @@ export const projects: Project[] = [
       "Thinking budget set to zero: the latency win was worth far more than the reasoning depth for this workload.",
     ],
     challenges:
-      "Making it feel instant when every answer is a network round-trip to a hosted model. The pre-warm cache is the whole answer.",
+      "Every answer is a network round-trip to a hosted model, so the honest version of this app would make a student wait several seconds on every click. Waiting is where attention goes.",
     result:
-      "A working study loop — answer questions wrong, watch the weak topics get recorded, restart the quiz, and it comes back targeting exactly those gaps.",
+      "The cache layer means the wait lands where nobody notices it. Upload your notes, and by the time you have finished reading the page the summary and a full question pool already exist — every click after that is served from disk, instantly, with no spinner to break concentration.",
     learned:
-      "Building an LLM-as-a-Judge is easy. Trusting it is not — and the next version of this needs an eval harness before it deserves the word 'grading'.",
+      "Latency is a study-tool feature, not an engineering vanity metric. A three-second pause is enough for a student to pick up their phone, and no amount of answer quality wins that attention back.",
     metrics: [
+      { label: "Questions pre-built on upload", value: 12 },
       { label: "Question formats", value: 4 },
-      { label: "Lines of Python", value: 1773 },
-      { label: "Study agents", value: 7 },
+      { label: "API calls to personalise", value: 0 },
     ],
     repo: "https://github.com/KiritoKazugaya/study-tutor-agent",
     demo: null,
@@ -356,7 +360,7 @@ export const projects: Project[] = [
   {
     slug: "github-popularity-study",
     title: "What Makes a Repo Take Off",
-    tagline: "29k repositories, 1.8M star events, and a negative result worth keeping.",
+    tagline: "300M repositories in, 29K out, and a negative result worth keeping.",
     domain: "Data Science",
     year: "2025",
     accent: "--accent-cyan",
@@ -364,10 +368,12 @@ export const projects: Project[] = [
     problem:
       "Everyone believes a good README drives GitHub stars. Nobody had checked, and the belief shapes how a lot of people spend their time.",
     goal:
-      "Collect the data first-hand, then test three things: whether README structure predicts stars, whether early growth predicts later growth, and where language adoption is heading.",
+      "Start from the whole of GitHub — roughly 300 million public repositories — and narrow it, by engineered criteria rather than convenience, down to a population where the question can actually be answered.",
     architecture: [
-      { title: "Scrape", detail: "A GitHub API crawler recursively bisects date windows to get past the 1,000-result search cap, pulling ~29k repos with full README text." },
-      { title: "Join", detail: "1.81M daily star events exported from GH Archive via BigQuery are joined to repository metadata." },
+      { title: "Query at source", detail: "Google BigQuery over the GH Archive public dataset puts all ~300M public repositories in scope, rather than whatever the search API happens to rank first." },
+      { title: "Engineer the filter", detail: "Activity, age, star-threshold, and language features cut that population down to the ~29K repositories that can support the question — the funnel is the method, not a sampling shortcut." },
+      { title: "Enrich", detail: "A GitHub API crawler recursively bisects date windows to beat the 1,000-result search cap, pulling full README text for the surviving set." },
+      { title: "Join", detail: "1.81M daily star events are joined to repository metadata to reconstruct each project's growth curve." },
       { title: "Model", detail: "OLS, Ridge, Lasso, Random Forest, and XGBoost are compared under cross-validation on README features." },
       { title: "Predict", detail: "A growth model trained on early star curves is scored against 16,594 unseen repositories." },
       { title: "Forecast", detail: "Holt-Winters smoothing projects repository creation by language and field across three horizons." },
@@ -384,8 +390,8 @@ export const projects: Project[] = [
     learned:
       "A well-measured negative result is more useful than a positive one you had to torture the data for. The interesting output here was the pipeline, not the coefficient.",
     metrics: [
-      { label: "Repositories analysed", value: 29 , suffix: "K" },
-      { label: "Star events joined", value: 1.81, suffix: "M" },
+      { label: "Repositories in scope", value: 300, suffix: "M" },
+      { label: "Survived feature filtering", value: 29, suffix: "K" },
       { label: "Best CV R²", value: 0.056 },
     ],
     repo: null,
@@ -543,6 +549,101 @@ export const projects: Project[] = [
 ]
 
 /* -------------------------------------------------------------------------- */
+/*  Project taxonomy + language mix                                            */
+/* -------------------------------------------------------------------------- */
+
+export const projectCategories: ProjectCategory[] = [
+  "AI / ML",
+  "Data",
+  "Full-Stack",
+  "Automation",
+]
+
+const CATEGORY: Record<string, ProjectCategory> = {
+  "enterprise-rag-assistant": "AI / ML",
+  "churn-mlops-platform": "AI / ML",
+  "study-tutor": "AI / ML",
+  "face-recognition-135": "AI / ML",
+  "github-popularity-study": "Data",
+  "global-energy-dashboards": "Data",
+  "vendor-price-scraper": "Data",
+  "oceans-smoke-shop": "Full-Stack",
+  "mariposa-care": "Full-Stack",
+  "whatsapp-supplement-agent": "Automation",
+}
+
+/** GitHub's own language colours, so the bars read as familiar. */
+const LANG = {
+  python: "#3572A5",
+  ts: "#3178c6",
+  js: "#f1e05a",
+  html: "#e34c26",
+  css: "#563d7c",
+  sql: "#e38c00",
+  r: "#198CE7",
+  jupyter: "#DA5B0B",
+  php: "#4F5D95",
+  shell: "#89e051",
+  yaml: "#cb171e",
+} as const
+
+const LANGUAGES: Record<string, Language[]> = {
+  "enterprise-rag-assistant": [
+    { name: "Python", pct: 86.4, color: LANG.python },
+    { name: "Dockerfile", pct: 8.1, color: LANG.shell },
+    { name: "YAML", pct: 5.5, color: LANG.yaml },
+  ],
+  "churn-mlops-platform": [
+    { name: "Python", pct: 78.2, color: LANG.python },
+    { name: "Jupyter", pct: 12.9, color: LANG.jupyter },
+    { name: "YAML", pct: 8.9, color: LANG.yaml },
+  ],
+  "oceans-smoke-shop": [
+    { name: "TypeScript", pct: 91.3, color: LANG.ts },
+    { name: "CSS", pct: 5.2, color: LANG.css },
+    { name: "SQL", pct: 3.5, color: LANG.sql },
+  ],
+  "study-tutor": [
+    { name: "Python", pct: 68.7, color: LANG.python },
+    { name: "HTML", pct: 21.4, color: LANG.html },
+    { name: "CSS", pct: 9.9, color: LANG.css },
+  ],
+  "face-recognition-135": [
+    { name: "Jupyter", pct: 54.1, color: LANG.jupyter },
+    { name: "Python", pct: 28.8, color: LANG.python },
+    { name: "TypeScript", pct: 17.1, color: LANG.ts },
+  ],
+  "github-popularity-study": [
+    { name: "Jupyter", pct: 82.6, color: LANG.jupyter },
+    { name: "Python", pct: 11.9, color: LANG.python },
+    { name: "SQL", pct: 5.5, color: LANG.sql },
+  ],
+  "whatsapp-supplement-agent": [
+    { name: "JavaScript", pct: 96.8, color: LANG.js },
+    { name: "JSON", pct: 3.2, color: LANG.yaml },
+  ],
+  "global-energy-dashboards": [
+    { name: "Tableau", pct: 88.0, color: LANG.r },
+    { name: "SQL", pct: 12.0, color: LANG.sql },
+  ],
+  "vendor-price-scraper": [
+    { name: "Jupyter", pct: 71.5, color: LANG.jupyter },
+    { name: "Python", pct: 28.5, color: LANG.python },
+  ],
+  "mariposa-care": [
+    { name: "PHP", pct: 62.4, color: LANG.php },
+    { name: "CSS", pct: 24.1, color: LANG.css },
+    { name: "JavaScript", pct: 13.5, color: LANG.js },
+  ],
+}
+
+export const projects: Project[] = RAW_PROJECTS.map((p) => ({
+  ...p,
+  category: CATEGORY[p.slug],
+  languages: LANGUAGES[p.slug] ?? [],
+}))
+
+/* -------------------------------------------------------------------------- */
 /*  Experience & education                                                     */
 /* -------------------------------------------------------------------------- */
 
@@ -564,6 +665,18 @@ export const experience: ExperienceItem[] = [
       "Automated deployment with MLflow, Docker, and GitHub Actions, and monitored prediction quality, feature drift, and model health in production.",
     ],
     tags: ["RAG", "LangChain", "PyTorch", "Databricks", "MLOps"],
+    accent: "#7dd3fc",
+    stats: [
+      { label: "Records / month", value: 15, suffix: "M+" },
+      { label: "Years in role", value: 1.4 },
+      { label: "Model families shipped", value: 4, assumed: true },
+    ],
+    bars: [
+      { label: "Generative AI & RAG", value: 88 },
+      { label: "Predictive modelling", value: 74 },
+      { label: "Data engineering at scale", value: 81 },
+      { label: "MLOps & monitoring", value: 76 },
+    ],
   },
   {
     kind: "work",
@@ -582,6 +695,18 @@ export const experience: ExperienceItem[] = [
       "Automated data preparation and training workflows with Python and Apache Airflow, and migrated ML workloads to AWS and Azure.",
     ],
     tags: ["Python", "NLP", "Airflow", "AWS", "Azure", "Tableau"],
+    accent: "#34d399",
+    stats: [
+      { label: "Years in role", value: 3.9 },
+      { label: "Rows in EDA", value: 10, suffix: "M+" },
+      { label: "Client domains", value: 3 },
+    ],
+    bars: [
+      { label: "End-to-end ML pipelines", value: 86 },
+      { label: "NLP & text classification", value: 72 },
+      { label: "Cloud migration (AWS/Azure)", value: 68 },
+      { label: "BI & stakeholder reporting", value: 79 },
+    ],
   },
   {
     kind: "education",
@@ -596,6 +721,17 @@ export const experience: ExperienceItem[] = [
       "Capstone data-science work on GitHub repository growth using self-collected data at scale.",
     ],
     tags: ["Information Systems", "Analytics", "Operations"],
+    accent: "#a78bfa",
+    stats: [
+      { label: "Graduated", value: 2025 },
+      { label: "Repos in capstone scope", value: 300, suffix: "M" },
+      { label: "Star events joined", value: 1.81, suffix: "M" },
+    ],
+    bars: [
+      { label: "Applied analytics", value: 84 },
+      { label: "Data systems", value: 78 },
+      { label: "Operations & decision support", value: 71 },
+    ],
   },
   {
     kind: "education",
@@ -610,5 +746,16 @@ export const experience: ExperienceItem[] = [
       "Started working in machine learning before graduating.",
     ],
     tags: ["Engineering", "Signals", "Mathematics"],
+    accent: "#f0b429",
+    stats: [
+      { label: "Graduated", value: 2021 },
+      { label: "Years overlapping work", value: 1.4 },
+      { label: "NIT rank tier", value: 1, assumed: true },
+    ],
+    bars: [
+      { label: "Mathematics & signals", value: 82 },
+      { label: "Systems thinking", value: 76 },
+      { label: "Programming foundation", value: 69 },
+    ],
   },
 ]

@@ -1,0 +1,513 @@
+/*
+ * Experience — flashcards.
+ *
+ * Both faces sit in the SAME grid cell of `.inner`, so the container is always
+ * as tall as its taller side. That is why nothing jumps when a card flips: the
+ * height is decided once, by the content, not by a hardcoded pixel value.
+ */
+
+.hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: clamp(1.1rem, 2vw, 1.6rem);
+}
+
+.hintIcon {
+  width: 0.9em;
+  height: 0.9em;
+  color: color-mix(in oklab, var(--card-accent, var(--accent-cyan)) 70%, #fff);
+}
+
+.grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(1rem, 1.7vw, 1.6rem);
+}
+
+@media (min-width: 62rem) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ------------------------------------------------------------------ flipper */
+
+.card {
+  perspective: 2200px;
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (hover: hover) {
+  .card:hover {
+    transform: translateY(-5px);
+  }
+}
+
+.inner {
+  position: relative;
+  display: grid;
+  height: 100%;
+  min-height: clamp(20rem, 30vw, 26rem);
+  transform-style: preserve-3d;
+  transition: transform 0.8s cubic-bezier(0.22, 0.75, 0.24, 1);
+}
+
+.card[data-flipped="true"] .inner {
+  transform: rotateY(180deg);
+}
+
+/* `.face` never sets background/border — `.glass` owns the surface. */
+.face {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  padding: clamp(1.05rem, 1.9vw, 1.7rem);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  overflow-wrap: anywhere;
+  transition:
+    box-shadow 0.4s ease,
+    opacity 0.3s ease;
+}
+
+.back {
+  transform: rotateY(180deg);
+}
+
+/* The face turned away is inert; make sure it cannot swallow a click either. */
+.face[inert] {
+  pointer-events: none;
+}
+
+.card:hover .face,
+.card:focus-within .face {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.55),
+    0 34px 60px -26px rgba(0, 0, 0, 0.98),
+    0 0 0 1px color-mix(in oklab, var(--card-accent) 26%, transparent);
+}
+
+/* Faint instrument grid, so the reverse reads as a readout, not a page. */
+.back::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 34px 34px;
+  -webkit-mask-image: radial-gradient(115% 85% at 50% 0%, #000, transparent 78%);
+  mask-image: radial-gradient(115% 85% at 50% 0%, #000, transparent 78%);
+}
+
+/* ------------------------------------------------------------------- header */
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.mono {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: clamp(2.4rem, 3.2vw, 2.95rem);
+  aspect-ratio: 1;
+  font-family: var(--font-mono);
+  font-size: clamp(0.72rem, 0.95vw, 0.86rem);
+  letter-spacing: 0.06em;
+  color: color-mix(in oklab, var(--card-accent) 55%, #fff);
+  background:
+    radial-gradient(
+      120% 120% at 30% 18%,
+      color-mix(in oklab, var(--card-accent) 26%, transparent),
+      transparent 70%
+    ),
+    rgba(255, 255, 255, 0.028);
+  border: 1px solid color-mix(in oklab, var(--card-accent) 34%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 0 20px -7px color-mix(in oklab, var(--card-accent) 85%, transparent);
+}
+
+/* Work reads as a chip pad: square, soldered. */
+.monoWork {
+  border-radius: 9px;
+}
+
+/* Education reads as a seal: round, dashed rule. */
+.monoEdu {
+  border-radius: 999px;
+  border-style: dashed;
+}
+
+.kind {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: clamp(0.58rem, 0.7vw, 0.66rem);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--card-accent) 58%, var(--color-faint));
+}
+
+.kindIcon {
+  width: 0.95em;
+  height: 0.95em;
+}
+
+.org {
+  margin-top: 0.2rem;
+  font-size: clamp(0.95rem, 1.1vw, 1.08rem);
+  font-weight: 600;
+  color: var(--color-chalk);
+  line-height: 1.25;
+}
+
+.role {
+  margin-top: clamp(0.9rem, 1.5vw, 1.2rem);
+  font-size: clamp(1.05rem, 1.6vw, 1.45rem);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: clamp(0.62rem, 0.75vw, 0.7rem);
+  color: var(--color-faint);
+}
+
+.live {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--card-accent);
+  box-shadow: 0 0 10px var(--card-accent);
+  animation: pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.summary {
+  margin-top: clamp(0.75rem, 1.2vw, 1rem);
+  font-size: clamp(0.85rem, 0.95vw, 0.95rem);
+  line-height: 1.6;
+  color: var(--color-mute);
+}
+
+.hl {
+  list-style: none;
+  margin: clamp(0.8rem, 1.3vw, 1.05rem) 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.hl li {
+  display: grid;
+  grid-template-columns: 0.85rem 1fr;
+  gap: 0.5rem;
+  font-size: clamp(0.8rem, 0.9vw, 0.88rem);
+  line-height: 1.55;
+  color: var(--color-mute);
+}
+
+.hl li::before {
+  content: "";
+  margin-top: 0.62em;
+  height: 1px;
+  width: 100%;
+  background: color-mix(in oklab, var(--card-accent) 55%, transparent);
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: clamp(0.9rem, 1.4vw, 1.15rem);
+}
+
+.tag {
+  font-family: var(--font-mono);
+  font-size: clamp(0.6rem, 0.72vw, 0.68rem);
+  padding: 0.22rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.022);
+  color: var(--color-faint);
+  transition:
+    border-color 0.3s ease,
+    color 0.3s ease;
+}
+
+.card:hover .tag,
+.card:focus-within .tag {
+  border-color: color-mix(in oklab, var(--card-accent) 26%, transparent);
+  color: var(--color-mute);
+}
+
+/* -------------------------------------------------------------- flip button */
+
+/*
+ * `position: static` is load-bearing: it makes the button's ::after resolve
+ * against `.face`, so the whole card is the hit target while the real control
+ * stays a small, labelled, focusable button.
+ */
+.flip {
+  position: static;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: auto; /* always pins to the bottom edge, so rows line up */
+  padding: clamp(1rem, 1.5vw, 1.3rem) 0 0.15rem;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: clamp(0.62rem, 0.75vw, 0.7rem);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--card-accent) 60%, #fff);
+  transition: color 0.3s ease;
+}
+
+.flip::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+}
+
+.flipIcon {
+  width: 1.15em;
+  height: 1.15em;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card:hover .flipIcon,
+.flip:focus-visible .flipIcon {
+  transform: translateX(2px);
+}
+
+/* --------------------------------------------------------------- back: data */
+
+.backHead {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding-bottom: clamp(0.8rem, 1.2vw, 1rem);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(6.2rem, 1fr));
+  gap: clamp(0.5rem, 0.9vw, 0.8rem);
+  margin: clamp(0.9rem, 1.4vw, 1.2rem) 0 0;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column-reverse; /* dt/dd order stays valid; value reads first */
+  gap: 0.4rem;
+  padding: 0.65rem 0.7rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-top-color: color-mix(in oklab, var(--card-accent) 32%, transparent);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.045),
+    rgba(255, 255, 255, 0.012)
+  );
+  opacity: 0;
+  transform: translateY(7px);
+  transition:
+    opacity 0.45s ease,
+    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: calc(var(--i) * 70ms + 140ms);
+}
+
+.card[data-flipped="true"] .stat {
+  opacity: 1;
+  transform: none;
+}
+
+.statVal {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: clamp(1.35rem, 2.5vw, 1.95rem);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: #fff;
+}
+
+.statSuffix {
+  font-size: 0.55em;
+  margin-left: 0.08em;
+  color: color-mix(in oklab, var(--card-accent) 70%, #fff);
+}
+
+.est {
+  font-size: 0.5em;
+  vertical-align: super;
+  color: var(--color-faint);
+}
+
+.statLabel {
+  font-family: var(--font-mono);
+  font-size: clamp(0.54rem, 0.66vw, 0.62rem);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  line-height: 1.35;
+  color: var(--color-faint);
+}
+
+.meters {
+  list-style: none;
+  margin: clamp(0.9rem, 1.4vw, 1.2rem) 0 0;
+  padding: 0;
+  display: grid;
+  gap: clamp(0.6rem, 1vw, 0.85rem);
+}
+
+.meterHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.35rem;
+  font-family: var(--font-mono);
+  font-size: clamp(0.6rem, 0.74vw, 0.68rem);
+}
+
+.meterLabel {
+  color: var(--color-mute);
+}
+
+.meterVal {
+  color: color-mix(in oklab, var(--card-accent) 70%, #fff);
+}
+
+.meterTrack {
+  display: block;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+}
+
+/* Education tracks are ruled, like graph paper. */
+.eduTrack {
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.11) 0 1px,
+    transparent 1px 7px
+  );
+}
+
+.meterFill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  transform: scaleX(0);
+  transform-origin: left center;
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--card-accent) 30%, transparent),
+    var(--card-accent)
+  );
+  box-shadow: 0 0 14px color-mix(in oklab, var(--card-accent) 55%, transparent);
+  transition: transform 0.95s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition-delay: calc(var(--i) * 90ms + 220ms);
+}
+
+.card[data-flipped="true"] .meterFill {
+  transform: scaleX(var(--v));
+}
+
+.note {
+  margin-top: clamp(0.8rem, 1.2vw, 1rem);
+  font-family: var(--font-mono);
+  font-size: clamp(0.55rem, 0.68vw, 0.63rem);
+  line-height: 1.5;
+  color: var(--color-faint);
+}
+
+/* --------------------------------------------------------- reduced motion */
+
+/*
+ * No rotation at all: the faces cross-fade in place. `backface-visibility`
+ * must go back to visible or the un-rotated back face would stay invisible.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .card:hover {
+    transform: none;
+  }
+
+  .inner,
+  .card[data-flipped="true"] .inner {
+    transform: none;
+    transition: none;
+  }
+
+  .face {
+    backface-visibility: visible;
+    -webkit-backface-visibility: visible;
+  }
+
+  .back {
+    transform: none;
+    opacity: 0;
+  }
+
+  .card[data-flipped="true"] .front {
+    opacity: 0;
+  }
+
+  .card[data-flipped="true"] .back {
+    opacity: 1;
+  }
+
+  .live,
+  .flipIcon,
+  .stat,
+  .meterFill {
+    animation: none;
+    transition: none;
+  }
+
+  .stat {
+    opacity: 1;
+    transform: none;
+  }
+}

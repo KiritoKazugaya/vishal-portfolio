@@ -1,0 +1,169 @@
+/*
+ * Contact — bespoke bits only. Everything that can come from the global design
+ * system (.glass, .inlay, .eyebrow, .terminal) does.
+ */
+
+/* -------------------------------------------------------------------------- */
+/*  Availability status — a pad energising                                     */
+/* -------------------------------------------------------------------------- */
+
+.pulse {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--accent-emerald);
+  box-shadow: 0 0 10px 1px color-mix(in oklab, var(--accent-emerald) 65%, transparent);
+}
+
+.pulse::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid var(--accent-emerald);
+  animation: ping 2.6s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  70%,
+  100% {
+    transform: scale(3.4);
+    opacity: 0;
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Ball-grid field — decorative pad array under the output stage              */
+/* -------------------------------------------------------------------------- */
+
+.bga {
+  background-image: radial-gradient(
+    circle at center,
+    color-mix(in oklab, var(--card-accent, var(--accent-amber)) 26%, transparent) 1.1px,
+    transparent 1.3px
+  );
+  background-size: 15px 15px;
+  -webkit-mask-image: linear-gradient(100deg, #000, transparent 72%);
+  mask-image: linear-gradient(100deg, #000, transparent 72%);
+  opacity: 0.7;
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Contact pads                                                               */
+/* -------------------------------------------------------------------------- */
+
+/*
+ * Deliberately quieter than the .glass card that holds them — a second layer of
+ * blurred glass inside the first both costs a repaint and flattens the
+ * hierarchy, so these are a flat tinted surface instead.
+ */
+.pad {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.025);
+  transition:
+    border-color 0.35s ease,
+    background-color 0.35s ease,
+    transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pad:hover,
+.pad:focus-within {
+  border-color: color-mix(in oklab, var(--card-accent, var(--accent-amber)) 42%, transparent);
+  background: rgba(255, 255, 255, 0.045);
+  transform: translateY(-2px);
+}
+
+/* A trace runs into the pad from the left edge when it is engaged. */
+.pad::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 0;
+  height: 1px;
+  opacity: 0.55;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--card-accent, var(--accent-amber)) 90%, transparent)
+  );
+  transition: width 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.pad:hover::before,
+.pad:focus-within::before {
+  width: 100%;
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Signal traces leaving the section                                          */
+/* -------------------------------------------------------------------------- */
+
+/*
+ * Drawn as repeating-gradient strips rather than an SVG: a stretched viewBox
+ * would distort the stroke weight at wide viewports, and this is responsive for
+ * free at any width.
+ */
+.lane {
+  height: 1px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--card-accent, var(--accent-amber)) 62%, transparent) 0 7px,
+    transparent 7px 19px
+  );
+  animation: lane-flow 1.9s linear infinite;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 66%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 7%, #000 66%, transparent);
+}
+
+@keyframes lane-flow {
+  to {
+    background-position: 19px 0;
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Map                                                                        */
+/* -------------------------------------------------------------------------- */
+
+/*
+ * OpenStreetMap only ships a light tile set, which would be the brightest thing
+ * on a near-black page. Inverting and rotating the hue back lands it in the same
+ * cool dark register as the rest of the site without needing a tile API key.
+ */
+.map {
+  filter: invert(0.92) hue-rotate(186deg) saturate(0.6) brightness(0.9) contrast(1.05);
+  opacity: 0.88;
+  transition:
+    opacity 0.4s ease,
+    filter 0.4s ease;
+}
+
+.mapFrame:hover .map,
+.mapFrame:focus-within .map {
+  opacity: 1;
+  filter: invert(0.9) hue-rotate(186deg) saturate(0.8) brightness(1) contrast(1.02);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse::after,
+  .lane {
+    animation: none;
+  }
+
+  .pad:hover,
+  .pad:focus-within {
+    transform: none;
+  }
+}

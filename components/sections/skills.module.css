@@ -1,0 +1,515 @@
+/*
+ * Skills — a 1:1 "die" stage: five power rails fanning out of a core, glass
+ * bead nodes tapped off each rail, and a CLI read-out welded to the bottom.
+ *
+ * Everything inside the stage is sized in `cqi` (container query inline size),
+ * so the whole instrument scales with the square instead of with the viewport.
+ * That is what keeps a 480px stage and a 1200px stage looking like the same
+ * object rather than two different ones.
+ *
+ * Scoped to this section; nothing here leaks into globals.
+ */
+
+/* -------------------------------------------------------------------------- */
+/*  Head — legend + filter pills. Lives OUTSIDE the square so the pills are     */
+/*  still there when the graph falls back to the list on small screens.         */
+/* -------------------------------------------------------------------------- */
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.6rem clamp(0.75rem, 2vw, 1.5rem);
+  margin-bottom: clamp(0.6rem, 1.4vw, 1.1rem);
+}
+
+.legend {
+  font-family: var(--font-mono);
+  font-size: clamp(0.6rem, 0.78vw, 0.74rem);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-faint);
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(0.25rem, 0.6vw, 0.5rem);
+}
+
+.pill {
+  font-family: var(--font-mono);
+  font-size: clamp(0.62rem, 0.8vw, 0.75rem);
+  line-height: 1;
+  padding: clamp(0.4rem, 0.7vw, 0.55rem) clamp(0.6rem, 1.1vw, 0.95rem);
+  border-radius: 999px;
+  border: 1px solid var(--color-edge);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--color-faint);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    color 0.25s ease,
+    border-color 0.25s ease,
+    background 0.25s ease;
+}
+
+.pill:hover {
+  color: var(--color-chalk);
+  border-color: color-mix(in oklab, var(--c) 55%, transparent);
+}
+
+.pillOn {
+  color: #05060a;
+  font-weight: 600;
+  background: var(--c);
+  border-color: transparent;
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Stage — the square                                                          */
+/* -------------------------------------------------------------------------- */
+
+.stage {
+  /* What sits above the square once it is scrolled into view: the fixed nav
+     (~4.6rem) and the pill row, plus breathing room. Deliberately near-constant
+     — that chrome does not grow with the viewport, so a reserve scaled by vh
+     would just shrink the square on tall screens for no reason. At 900px high
+     this leaves the square ~26px of slack under the pills; at 1440px, ~50px. */
+  --reserve: clamp(9rem, 5vh + 6rem, 12rem);
+  --dur: 3.6s;
+
+  display: none;
+  flex-direction: column;
+  gap: clamp(0.4rem, 1.1vw, 0.9rem);
+  width: min(100%, calc(100svh - var(--reserve)));
+  aspect-ratio: 1 / 1;
+  margin-inline: auto;
+  padding: clamp(0.7rem, 1.4vw, 1.3rem);
+  container-type: inline-size;
+}
+
+/*
+ * The graph needs real estate before it beats a list. The height gate is the
+ * load-bearing one: 44rem tall yields a 560px square, which is the smallest
+ * size at which every label still fits its capsule (below that the font-size
+ * floors stop scaling while the capsules keep shrinking, and the three longest
+ * names — "Prompt Engineering", "Backend & MLOps", "Databases & Tools" — start
+ * ellipsizing). Under either gate the grouped list takes over.
+ */
+@media (min-width: 58rem) and (min-height: 44rem) {
+  .stage {
+    display: flex;
+  }
+}
+
+.graph {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Traces                                                                      */
+/* -------------------------------------------------------------------------- */
+
+.traces {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.trace {
+  fill: none;
+  stroke: color-mix(in oklab, var(--c) 30%, transparent);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tap {
+  stroke: color-mix(in oklab, var(--c) 26%, transparent);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+}
+
+/* The hovered node's own rail brightens, so "trace one" is literally true. */
+.live .trace,
+.live .tap {
+  stroke: color-mix(in oklab, var(--c) 62%, transparent);
+}
+
+.trace,
+.tap {
+  transition: stroke 0.25s ease;
+}
+
+/* The charge. A 9%-long bright dash walked from the core to the last node. */
+.charge {
+  fill: none;
+  stroke: color-mix(in oklab, var(--c) 55%, #ffffff);
+  stroke-width: 2.1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 9 191;
+  filter: drop-shadow(0 0 3px var(--c));
+  animation: flow var(--dur) linear infinite;
+  animation-delay: var(--delay);
+}
+
+@keyframes flow {
+  from {
+    stroke-dashoffset: 9;
+  }
+  to {
+    stroke-dashoffset: -109;
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Nodes — glass beads in a glass capsule                                      */
+/* -------------------------------------------------------------------------- */
+
+.node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: clamp(3px, 0.55cqi, 6px);
+  width: var(--cap-w);
+  padding: clamp(2px, 0.55cqi, 8px) clamp(3px, 0.6cqi, 9px);
+  border-radius: 999px;
+  text-align: left;
+  cursor: pointer;
+  background: linear-gradient(
+      158deg,
+      rgba(255, 255, 255, 0.08) 0%,
+      rgba(255, 255, 255, 0.014) 55%,
+      rgba(255, 255, 255, 0.05) 100%
+    ),
+    rgba(9, 9, 13, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.085);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.55),
+    0 10px 20px -14px rgba(0, 0, 0, 0.95);
+  transition:
+    transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.28s ease,
+    box-shadow 0.28s ease;
+}
+
+.node:hover,
+.node:focus-visible,
+.nodeOn {
+  z-index: 3;
+  transform: translate(-50%, -50%) scale(1.05);
+  border-color: color-mix(in oklab, var(--c) 60%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 0 0 1px color-mix(in oklab, var(--c) 26%, transparent),
+    0 14px 26px -14px rgba(0, 0, 0, 0.98);
+}
+
+/* The bead: a lit sphere, not a dot. Specular top-left, coloured core,
+   bounce light along the bottom rim. */
+.bead {
+  position: relative;
+  flex: 0 0 auto;
+  width: calc(clamp(8px, 1.5cqi, 24px) * var(--wf, 1));
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  background:
+    radial-gradient(
+      circle at 34% 27%,
+      rgba(255, 255, 255, 0.95) 0 10%,
+      rgba(255, 255, 255, 0.3) 24%,
+      transparent 48%
+    ),
+    radial-gradient(
+      circle at 50% 116%,
+      color-mix(in oklab, var(--c) 60%, #ffffff) 0 34%,
+      transparent 60%
+    ),
+    radial-gradient(
+      circle at 50% 42%,
+      color-mix(in oklab, var(--c) 96%, #ffffff) 0 40%,
+      color-mix(in oklab, var(--c) 62%, #000000) 100%
+    );
+  box-shadow:
+    inset 0 -1px 2px rgba(0, 0, 0, 0.55),
+    0 0 8px -2px color-mix(in oklab, var(--c) 80%, transparent);
+  animation: arrive var(--dur) linear infinite;
+  animation-delay: var(--delay);
+}
+
+/* Fires the instant the charge reaches this node. */
+@keyframes arrive {
+  0%,
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  6% {
+    transform: scale(1.32);
+    filter: brightness(2.1) saturate(1.2);
+  }
+  26% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+}
+
+.label {
+  min-width: 0;
+  flex: 1 1 auto;
+  /* The floor must stay below 1.5cqi at the smallest square the media query
+     lets through (560px → 8.0px), or the text outgrows its capsule and clips.
+     Half a pixel of margin so a font-metric difference cannot tip it over. */
+  font-size: clamp(7.5px, 1.5cqi, 17px);
+  line-height: 1.15;
+  letter-spacing: -0.012em;
+  color: var(--color-mute);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.25s ease;
+}
+
+.node:hover .label,
+.node:focus-visible .label,
+.nodeOn .label {
+  color: var(--color-chalk);
+}
+
+/* Hub chip — the category, and a second way to work the filter. */
+.hub {
+  border-color: color-mix(in oklab, var(--c) 34%, rgba(255, 255, 255, 0.09));
+}
+
+.hubOn {
+  border-color: color-mix(in oklab, var(--c) 75%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 0 0 1px color-mix(in oklab, var(--c) 30%, transparent),
+    0 0 22px -10px var(--c);
+}
+
+/* Deliberately not .label — the global .inlay-soft owns the colour here, and a
+   colour of its own would paint straight over the gold. */
+.hubLabel {
+  min-width: 0;
+  flex: 1 1 auto;
+  /* Same floor rule as .label, one notch lower because the hub runs at 1.4cqi. */
+  font-size: clamp(7px, 1.4cqi, 15px);
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* The core the rails leave from. Sits on the seam between graph and terminal. */
+.core {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  transform: translate(-50%, -50%);
+  width: clamp(11px, 2.1cqi, 19px);
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 34% 26%, rgba(255, 255, 255, 0.98) 0 12%, transparent 46%),
+    radial-gradient(circle at 50% 45%, #f0dfa8 0 32%, var(--accent-gold) 72%, #6f5623 100%);
+  box-shadow:
+    inset 0 -1px 2px rgba(0, 0, 0, 0.5),
+    0 0 18px -2px color-mix(in oklab, var(--accent-gold) 65%, transparent);
+}
+
+/* A filtered-out column stays exactly where it was — no reflow, just off. */
+.dim {
+  opacity: 0.09;
+  pointer-events: none;
+  filter: saturate(0.25);
+}
+
+.col,
+.wires {
+  transition: opacity 0.35s ease;
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Read-out                                                                    */
+/* -------------------------------------------------------------------------- */
+
+.term {
+  flex: 0 0 auto;
+  overflow: hidden;
+}
+
+.termBar {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.4rem, 1cqi, 0.7rem);
+  padding: clamp(0.3rem, 0.7cqi, 0.5rem) clamp(0.5rem, 1.1cqi, 0.85rem);
+}
+
+.dots {
+  display: flex;
+  gap: clamp(3px, 0.5cqi, 5px);
+}
+
+.dots i {
+  width: clamp(7px, 1.05cqi, 10px);
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  opacity: 0.8;
+}
+
+.termTitle,
+.termMeta {
+  font-size: clamp(9.5px, 1.5cqi, 15px);
+  letter-spacing: 0.08em;
+  color: var(--color-faint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.termMeta {
+  margin-left: auto;
+  color: color-mix(in oklab, var(--c) 80%, var(--color-mute));
+}
+
+.termBody {
+  padding: clamp(0.45rem, 1cqi, 0.8rem) clamp(0.5rem, 1.1cqi, 0.9rem);
+}
+
+/* Three lines, always. The panel can never resize under the cursor. */
+.line {
+  font-size: clamp(11px, 1.9cqi, 18px);
+  line-height: 1.55;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cmd {
+  color: var(--color-mute);
+}
+
+.prompt {
+  color: var(--accent-emerald);
+}
+
+.arg {
+  color: color-mix(in oklab, var(--c) 85%, #ffffff);
+}
+
+.out {
+  color: var(--color-chalk);
+}
+
+.meta {
+  color: var(--color-faint);
+  opacity: 0.85;
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Fallback list — the small-screen view                                       */
+/* -------------------------------------------------------------------------- */
+
+.list {
+  display: grid;
+  gap: clamp(1.25rem, 3vw, 2rem);
+}
+
+.groupHead {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--c);
+}
+
+.groupHead::before {
+  content: "";
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--c);
+  box-shadow: 0 0 8px -1px var(--c);
+}
+
+.chips {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.chip {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 999px;
+}
+
+.chipBead {
+  flex: 0 0 auto;
+  width: 0.7rem;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 34% 27%, rgba(255, 255, 255, 0.95) 0 12%, transparent 48%),
+    radial-gradient(circle at 50% 45%, var(--c) 0 45%, color-mix(in oklab, var(--c) 55%, #000) 100%);
+  box-shadow: 0 0 8px -2px var(--c);
+}
+
+/* Mirrors the query that switches the stage on. Declared here, after .list, so
+   it actually wins — same specificity, so source order decides. */
+@media (min-width: 58rem) and (min-height: 44rem) {
+  .list {
+    display: none;
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Reduced motion — the charge stops travelling, everything stays readable.    */
+/* -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .charge {
+    display: none;
+  }
+
+  .bead,
+  .core {
+    animation: none;
+  }
+
+  .node,
+  .label,
+  .pill,
+  .col,
+  .wires,
+  .trace,
+  .tap {
+    transition: none;
+  }
+
+  .node:hover,
+  .node:focus-visible,
+  .nodeOn {
+    transform: translate(-50%, -50%);
+  }
+}
