@@ -90,7 +90,7 @@ export function ChipCanvas() {
     return (
       <div className="fixed inset-0 -z-10 flex items-center justify-center overflow-hidden bg-[#050507]">
         <Image
-          src="/assets/chip/fallback-exploded.png"
+          src="/assets/chip/fallback-exploded.webp"
           alt="Exploded view of a GPU package: heat spreader, silicon die, interposer, package substrate, and BGA contact array, separated along a vertical axis."
           width={1400}
           height={1400}

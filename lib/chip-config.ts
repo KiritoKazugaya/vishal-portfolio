@@ -27,8 +27,9 @@ export interface LayerDef {
 }
 
 /**
- * Assembled thickness is the sum of the slabs; separated positions are
- * deliberately non-uniform — the interposer gap is widest because Projects
+ * Assembled thickness is the sum of the slabs; separated positions are spread
+ * wide enough that a chapter of copy fits *inside* each opening, which is where
+ * the content actually sits. The interposer gap is widest because Projects
  * carries several times more content than any other chapter.
  */
 export const LAYERS: LayerDef[] = [
@@ -36,10 +37,10 @@ export const LAYERS: LayerDef[] = [
     id: "package",
     label: "About",
     technical: "Integrated heat spreader · package lid",
-    texture: "/assets/chip/layer-top.png",
+    texture: "/assets/chip/layer-top.webp",
     size: 4.0,
     thickness: 0.17,
-    separatedY: 3.05,
+    separatedY: 4.6,
     accent: "#7dd3fc",
     emissive: "#0e3b52",
   },
@@ -47,10 +48,10 @@ export const LAYERS: LayerDef[] = [
     id: "die",
     label: "Skills",
     technical: "Silicon die · compute fabric",
-    texture: "/assets/chip/layer-die.png",
+    texture: "/assets/chip/layer-die.webp",
     size: 2.45,
     thickness: 0.1,
-    separatedY: 1.5,
+    separatedY: 1.8,
     accent: "#c7a24a",
     emissive: "#4a3a12",
   },
@@ -58,10 +59,10 @@ export const LAYERS: LayerDef[] = [
     id: "interposer",
     label: "Projects",
     technical: "Silicon interposer · die-to-package routing",
-    texture: "/assets/chip/layer-interposer.png",
+    texture: "/assets/chip/layer-interposer.webp",
     size: 3.5,
     thickness: 0.12,
-    separatedY: -0.5,
+    separatedY: -1.2,
     accent: "#a78bfa",
     emissive: "#2b1f52",
   },
@@ -69,10 +70,10 @@ export const LAYERS: LayerDef[] = [
     id: "substrate",
     label: "Experience",
     technical: "Package substrate · signal fan-out",
-    texture: "/assets/chip/layer-substrate.png",
+    texture: "/assets/chip/layer-substrate.webp",
     size: 4.0,
     thickness: 0.14,
-    separatedY: -2.35,
+    separatedY: -4.0,
     accent: "#34d399",
     emissive: "#0d3d2c",
   },
@@ -80,10 +81,10 @@ export const LAYERS: LayerDef[] = [
     id: "contacts",
     label: "Contact",
     technical: "BGA solder-ball array · board interface",
-    texture: "/assets/chip/layer-bga.png",
+    texture: "/assets/chip/layer-bga.webp",
     size: 4.15,
     thickness: 0.16,
-    separatedY: -4.1,
+    separatedY: -6.7,
     accent: "#f0b429",
     emissive: "#4a3208",
   },

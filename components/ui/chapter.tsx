@@ -25,10 +25,17 @@ export function Chapter({ id, title, lead, children, wide = false }: Props) {
       id={id}
       data-layer={id}
       aria-labelledby={`${id}-heading`}
-      className="relative py-24 md:py-36"
+      className="relative py-28 md:py-44"
     >
       <div className="shell">
-        <div className={wide ? "" : "lg:ml-auto lg:w-[54%]"}>
+        {/*
+          Centred, not offset to one side: the camera parks on the opening
+          between this layer and the next, so the copy reads as sitting inside
+          the chip rather than beside it.
+        */}
+        <div
+          className={`chapter-scrim mx-auto ${wide ? "max-w-5xl" : "max-w-2xl"}`}
+        >
           <div data-reveal className="mb-10">
             <div className="mb-4 flex items-center gap-3">
               <span

@@ -21,9 +21,9 @@ import { CurrentFlow } from "./current-flow"
 const KEYS = [
   { t: 0.0, pos: [0, 12.6, 0.02], look: [0, 0, 0] },
   { t: 0.2, pos: [0, 11.0, 2.4], look: [0, 0, 0] },
-  { t: 0.46, pos: [0, 5.6, 8.6], look: [0, 0, 0] },
-  { t: 0.82, pos: [0, 1.8, 13.4], look: [0, -0.4, 0] },
-  { t: 1.0, pos: [0, 1.0, 14.2], look: [0, -0.6, 0] },
+  { t: 0.46, pos: [0, 5.8, 9.0], look: [0, 0, 0] },
+  { t: 0.82, pos: [0, 2.0, 15.0], look: [0, -0.4, 0] },
+  { t: 1.0, pos: [0, 1.1, 16.2], look: [0, -0.6, 0] },
 ] as const
 
 function sampleCamera(p: number, out: { pos: THREE.Vector3; look: THREE.Vector3 }) {
@@ -45,7 +45,22 @@ function sampleCamera(p: number, out: { pos: THREE.Vector3; look: THREE.Vector3 
   )
 }
 
-function CameraRig({ wide }: { wide: boolean }) {
+/**
+ * Y of the opening the reader is currently inside.
+ *
+ * The camera targets the gap between the active layer and the one below it,
+ * not the layer itself — that is what puts the chapter's copy *between* the
+ * slabs rather than next to them. The last chapter has no layer below it, so it
+ * sits just under the contact array.
+ */
+function gapCentre(active: number) {
+  const a = LAYERS[Math.min(active, LAYERS.length - 1)]
+  if (active >= LAYERS.length - 1) return a.separatedY - 1.1
+  const b = LAYERS[active + 1]
+  return (a.separatedY + b.separatedY) / 2
+}
+
+function CameraRig() {
   const { camera } = useThree()
   const sample = useMemo(
     () => ({ pos: new THREE.Vector3(), look: new THREE.Vector3() }),
@@ -57,17 +72,13 @@ function CameraRig({ wide }: { wide: boolean }) {
     const dt = Math.min(delta, 1 / 30)
     sampleCamera(chipState.hero, sample)
 
-    // Once the hero act has resolved, the camera tracks down the stack as the
-    // reader moves through the chapters.
+    // Once the hero act has resolved, the camera descends the stack, settling
+    // on the opening that belongs to the chapter being read. The chip stays
+    // centred: the copy now sits over it, inside the gap.
     if (chipState.hero > 0.98) {
-      const activeY = LAYERS[chipState.active]?.separatedY ?? 0
-      sample.look.y += activeY * 0.55
-      sample.pos.y += activeY * 0.42
-      // Push the stack off-centre on wide screens so copy has its own column.
-      if (wide) {
-        sample.pos.x += 2.5
-        sample.look.x += 2.5
-      }
+      const y = gapCentre(chipState.active)
+      sample.look.y += y * 0.92
+      sample.pos.y += y * 0.86
     }
 
     if (!chipState.reduced) {
@@ -110,15 +121,12 @@ function FocusLight() {
 }
 
 export function ChipScene({ density }: { density: number }) {
-  const { size } = useThree()
-  const wide = size.width >= 1024
-
   return (
     <>
       <color attach="background" args={["#050507"]} />
-      <fog attach="fog" args={["#050507", 14, 30]} />
+      <fog attach="fog" args={["#050507", 16, 34]} />
 
-      <CameraRig wide={wide} />
+      <CameraRig />
 
       <ambientLight intensity={0.35} />
       <directionalLight position={[4, 12, 6]} intensity={1.5} color="#dbeafe" />
