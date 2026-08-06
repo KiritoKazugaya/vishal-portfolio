@@ -1,9 +1,12 @@
 "use client"
 
+import type { CSSProperties } from "react"
+
 import { LAYERS } from "@/lib/chip-config"
 import { contact, navItems, profile } from "@/lib/data"
 import { scrollToLayer } from "@/hooks/use-chip-timeline"
 import { useActiveLayer } from "@/hooks/use-active-layer"
+import s from "./nav.module.css"
 
 /**
  * Fixed navigation. The active item is whichever chip layer is currently
@@ -35,19 +38,13 @@ export function Nav() {
                 <button
                   type="button"
                   onClick={() => scrollToLayer(item.layer)}
+                  data-active={isActive}
                   aria-current={isActive ? "true" : undefined}
-                  className="group relative px-3 py-2 text-sm text-mute transition-colors hover:text-chalk"
-                  style={isActive ? { color: LAYERS[index].accent } : undefined}
+                  className={s.topItem}
+                  style={{ "--pin": LAYERS[index].accent } as CSSProperties}
                 >
                   {item.label}
-                  <span
-                    className="absolute inset-x-3 -bottom-px h-px origin-left transition-transform duration-300"
-                    style={{
-                      background: LAYERS[index].accent,
-                      transform: `scaleX(${isActive ? 1 : 0})`,
-                    }}
-                    aria-hidden
-                  />
+                  <span className={s.topRule} aria-hidden />
                 </button>
               </li>
             )
@@ -67,48 +64,49 @@ export function Nav() {
 }
 
 /**
- * Vertical layer rail — a live read-out of which slab is energised. Doubles as
- * the mobile navigation, where the horizontal nav is hidden.
+ * Vertical chapter rail, styled as the package's pin rail: a spine with a
+ * contact pad per chapter and a pin number beside it.
+ *
+ * The previous version drew inactive items at #5a5d69 over 55% opacity — about
+ * 2:1 against the page, which is invisible rather than subtle. The resting
+ * label now sits near 8:1, and the active chapter is carried by colour, a
+ * filled pad, a glow and a lengthened lead-in rather than by contrast alone.
  */
 export function LayerRail() {
   const active = useActiveLayer()
 
   return (
-    <div className="fixed left-[max(1rem,env(safe-area-inset-left))] top-1/2 z-40 hidden -translate-y-1/2 lg:block">
-      <ul className="flex flex-col gap-4">
-        {LAYERS.map((layer, i) => {
-          const isActive = i === active
-          return (
-            <li key={layer.id}>
-              <button
-                type="button"
-                onClick={() => scrollToLayer(layer.id)}
-                className="group flex items-center gap-3"
-                aria-label={`Go to ${layer.label}`}
-                aria-current={isActive ? "true" : undefined}
-              >
-                <span
-                  className="block h-px transition-all duration-500"
-                  style={{
-                    width: isActive ? 34 : 16,
-                    background: isActive ? layer.accent : "#2a2a33",
-                  }}
-                  aria-hidden
-                />
-                <span
-                  className="font-mono text-[0.65rem] uppercase tracking-[0.16em] transition-all duration-500"
-                  style={{
-                    color: isActive ? layer.accent : "#5a5d69",
-                    opacity: isActive ? 1 : 0.55,
-                  }}
+    <nav aria-label="Chapters" className={s.rail}>
+      <div className="glass px-2.5 py-3">
+        <ol className={s.list}>
+          <span className={s.spine} aria-hidden />
+
+          {LAYERS.map((layer, i) => {
+            const isActive = i === active
+            return (
+              <li key={layer.id}>
+                <button
+                  type="button"
+                  onClick={() => scrollToLayer(layer.id)}
+                  data-active={isActive}
+                  aria-current={isActive ? "true" : undefined}
+                  className={s.item}
+                  style={{ "--pin": layer.accent } as CSSProperties}
                 >
-                  {layer.label}
-                </span>
-              </button>
-            </li>
-          )
-        })}
-      </ul>
-    </div>
+                  <span className={s.padWrap} aria-hidden>
+                    <span className={s.pad} />
+                  </span>
+                  <span className={s.num} aria-hidden>
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span className={s.label}>{layer.label}</span>
+                  <span className={s.lead} aria-hidden />
+                </button>
+              </li>
+            )
+          })}
+        </ol>
+      </div>
+    </nav>
   )
 }

@@ -40,7 +40,7 @@ export function About() {
                 {s.value}
                 {"suffix" in s && s.suffix ? s.suffix : ""}
               </span>
-              <span className="mt-2 block text-[clamp(0.68rem,0.85vw,0.8rem)] leading-snug text-faint">
+              <span className="mt-2.5 block text-[clamp(0.75rem,0.95vw,0.9rem)] font-medium leading-snug text-mute">
                 {s.label}
               </span>
             </dd>

@@ -8,8 +8,14 @@
   --color-edge: #23232c;
 
   --color-chalk: #eceef3;
-  --color-mute: #a2a5b2;
-  --color-faint: #757885;
+  /*
+   * Contrast floor, measured against the #050507 page.
+   * `faint` was #757885 (~4.4:1) — under the readable floor for the 11px
+   * micro-labels it is used on. `mute` and `faint` now sit near 10:1 and 7:1,
+   * so nothing on the page falls below AA at its actual rendered size.
+   */
+  --color-mute: #b3b7c4;
+  --color-faint: #949aab;
 
   /* One accent per chip layer. */
   --color-cyan: #7dd3fc;
@@ -296,12 +302,18 @@ body {
 /*  Type                                                                       */
 /* -------------------------------------------------------------------------- */
 
+/*
+ * Micro-labels carry section meaning, so they need to survive being 11px on
+ * near-black: brighter than body-secondary, a touch of weight, and slightly
+ * tighter tracking than before so the letters group into words at this size.
+ */
 .eyebrow {
   font-family: var(--font-mono);
-  font-size: clamp(0.62rem, 0.7vw, 0.72rem);
-  letter-spacing: 0.2em;
+  font-size: clamp(0.68rem, 0.78vw, 0.79rem);
+  font-weight: 500;
+  letter-spacing: 0.17em;
   text-transform: uppercase;
-  color: var(--color-faint);
+  color: #a8adbc;
 }
 
 .h-chapter {

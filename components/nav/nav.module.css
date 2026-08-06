@@ -1,0 +1,193 @@
+/*
+ * Navigation state is expressed as [data-active] on the button and resolved in
+ * CSS, NOT as inline styles on the children.
+ *
+ * That is a correctness fix, not a preference. With inline styles the button's
+ * aria-current updated on scroll but the child span's colour did not, so the
+ * rail told a screen reader "Skills" while showing "About" highlighted. Driving
+ * descendants from one attribute on the ancestor means the visual state and the
+ * announced state cannot drift apart.
+ *
+ * --pin is the layer accent. It is constant per item, so it can stay inline.
+ */
+
+/* -------------------------------------------------------------------------- */
+/*  Vertical chapter rail                                                      */
+/* -------------------------------------------------------------------------- */
+
+.rail {
+  position: fixed;
+  left: max(0.6rem, env(safe-area-inset-left));
+  top: 50%;
+  z-index: 40;
+  transform: translateY(-50%);
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .rail {
+    display: block;
+  }
+}
+
+.list {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+/* The spine the contact pads sit on. */
+.spine {
+  position: absolute;
+  top: 0.75rem;
+  bottom: 0.75rem;
+  left: 1.05rem;
+  width: 1px;
+  transform: translateX(-50%);
+  background: var(--color-edge);
+}
+
+.item {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.375rem 0.75rem 0.375rem 0.375rem;
+  border: 0;
+  border-radius: 0.5rem;
+  background: none;
+  cursor: pointer;
+  transition: background-color 0.25s ease;
+}
+
+.item:hover {
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.padWrap {
+  position: relative;
+  display: flex;
+  height: 1rem;
+  width: 1rem;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+}
+
+.pad {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #4b4f5e;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  transition:
+    width 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    height 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 0.4s ease,
+    box-shadow 0.4s ease;
+}
+
+.item[data-active="true"] .pad {
+  width: 9px;
+  height: 9px;
+  background: var(--pin);
+  box-shadow:
+    0 0 12px 1px var(--pin),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.num {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-variant-numeric: tabular-nums;
+  color: #8b8fa0;
+  transition: color 0.35s ease;
+}
+
+.item[data-active="true"] .num {
+  color: var(--pin);
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  /* ~7.9:1 on the page — readable as a resting state, not a hint. */
+  color: #9ca1b1;
+  transition: color 0.35s ease;
+}
+
+.item[data-active="true"] .label {
+  color: #f2f4f8;
+}
+
+/* Lead-in that extends only for the energised chapter. */
+.lead {
+  display: block;
+  height: 1px;
+  width: 7px;
+  margin-left: auto;
+  background: #4b4f5e;
+  transition:
+    width 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 0.4s ease;
+}
+
+.item[data-active="true"] .lead {
+  width: 18px;
+  background: var(--pin);
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Top navigation                                                             */
+/* -------------------------------------------------------------------------- */
+
+.topItem {
+  position: relative;
+  padding: 0.5rem 0.75rem;
+  border: 0;
+  background: none;
+  font-size: 0.875rem;
+  color: var(--color-mute);
+  cursor: pointer;
+  transition: color 0.25s ease;
+}
+
+.topItem:hover {
+  color: var(--color-chalk);
+}
+
+.topItem[data-active="true"] {
+  color: var(--pin);
+}
+
+.topRule {
+  position: absolute;
+  left: 0.75rem;
+  right: 0.75rem;
+  bottom: -1px;
+  height: 1px;
+  background: var(--pin);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.topItem[data-active="true"] .topRule {
+  transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pad,
+  .num,
+  .label,
+  .lead,
+  .topItem,
+  .topRule {
+    transition: none;
+  }
+}
