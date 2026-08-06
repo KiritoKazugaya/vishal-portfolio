@@ -48,7 +48,19 @@
   bottom: -1px;
   height: 2px;
   border-radius: 2px;
-  background: linear-gradient(90deg, #e0c377, #c7a24a, #8d6f30);
+  /* Banded along its length so the rule reads as a machined strip of metal
+     rather than a flat swatch, with a specular pip at the centre. */
+  background: linear-gradient(
+    90deg,
+    #6f5320 0%,
+    #c9a24d 14%,
+    #fdf3d2 34%,
+    #e0c377 50%,
+    #fdf3d2 66%,
+    #c9a24d 86%,
+    #6f5320 100%
+  );
+  box-shadow: 0 0 8px -2px rgba(224, 195, 119, 0.65);
   transform: scaleX(0);
   transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
 }

@@ -178,33 +178,118 @@ body {
 /* -------------------------------------------------------------------------- */
 
 /*
- * The carved read comes from lighting the glyph top-down (bright bevel at the
- * top, dark base at the bottom) and dropping a 1px black shadow beneath it, so
- * the letterform looks recessed into the surface rather than printed on it.
+ * Polished gold.
+ *
+ * A single light-to-dark ramp is what makes gradient text read as matte
+ * plastic. Real metal is anisotropic: it alternates hard specular bands with
+ * dark bands where it reflects the unlit surroundings, and the transitions are
+ * abrupt rather than smooth. Two hot bands (23% and 73%) with darker troughs
+ * between them is what does the work here.
+ *
+ * Gloss is the second layer: a narrow diagonal highlight that sweeps across the
+ * glyphs, which is what separates polished metal from brushed.
+ *
+ * The carved read still comes from lighting top-down and dropping a hard black
+ * shadow beneath the glyph, so it sits *in* the surface rather than on it.
  */
-.inlay {
-  background-image: linear-gradient(
-    177deg,
-    #f7e7b4 0%,
-    #e0c377 22%,
-    #c7a24a 48%,
-    #9a7833 74%,
-    #6f5623 100%
+:root {
+  --metal-gold: linear-gradient(
+    176deg,
+    #7d5f25 0%,
+    #c9a24d 7%,
+    #f9edc6 15%,
+    #fffbe8 23%,
+    #e6c97e 32%,
+    #b08a31 44%,
+    #96742a 54%,
+    #dcbe6b 63%,
+    #f8ecbb 73%,
+    #cda751 83%,
+    #9c7a2e 92%,
+    #7d5f25 100%
   );
+  --metal-sheen: linear-gradient(
+    100deg,
+    transparent 38%,
+    rgba(255, 253, 240, 0.42) 47%,
+    rgba(255, 255, 255, 0.72) 50%,
+    rgba(255, 253, 240, 0.42) 53%,
+    transparent 62%
+  );
+}
+
+.inlay {
+  background-image: var(--metal-sheen), var(--metal-gold);
+  background-size: 260% 100%, 100% 100%;
+  background-position: 190% 0, 0 0;
+  background-repeat: no-repeat;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   filter:
-    drop-shadow(0 1px 0 rgba(0, 0, 0, 0.92))
-    drop-shadow(0 -0.5px 0 rgba(255, 245, 210, 0.14));
+    drop-shadow(0 1px 0 rgba(0, 0, 0, 0.94))
+    drop-shadow(0 -0.5px 0 rgba(255, 246, 214, 0.2));
+  animation: gold-sweep 7s ease-in-out infinite;
 }
 
 .inlay-soft {
-  background-image: linear-gradient(177deg, #efe0bb 0%, #cbab5e 55%, #8d6f30 100%);
+  background-image: var(--metal-sheen), var(--metal-gold);
+  background-size: 260% 100%, 100% 100%;
+  background-position: 190% 0, 0 0;
+  background-repeat: no-repeat;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.85));
+  filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.88));
+  animation: gold-sweep 9s ease-in-out infinite;
+  animation-delay: -3s;
+}
+
+/*
+ * Metallic gold for surfaces rather than text — rules, meters, bars.
+ * Same ramp rotated 90deg so a horizontal element still shows its bands.
+ */
+.gold-metal {
+  background-image:
+    linear-gradient(
+      100deg,
+      transparent 38%,
+      rgba(255, 255, 255, 0.55) 50%,
+      transparent 62%
+    ),
+    linear-gradient(
+      184deg,
+      #6f5320 0%,
+      #c9a24d 18%,
+      #fdf3d2 42%,
+      #d9b558 62%,
+      #96742a 82%,
+      #6f5320 100%
+    );
+  background-size: 260% 100%, 100% 100%;
+  background-position: 190% 0, 0 0;
+  background-repeat: no-repeat;
+  animation: gold-sweep 7s ease-in-out infinite;
+}
+
+@keyframes gold-sweep {
+  0% {
+    background-position: 190% 0, 0 0;
+  }
+  55%,
+  100% {
+    background-position: -90% 0, 0 0;
+  }
+}
+
+/* No sweep for reduced motion — the metal bands alone still read as metal. */
+@media (prefers-reduced-motion: reduce) {
+  .inlay,
+  .inlay-soft,
+  .gold-metal {
+    animation: none;
+    background-position: 190% 0, 0 0;
+  }
 }
 
 /* -------------------------------------------------------------------------- */
