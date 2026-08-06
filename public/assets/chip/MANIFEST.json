@@ -1,0 +1,33 @@
+{
+  "layer-top": {
+    "source": "hero-section-chip.png",
+    "crop": [
+      144,
+      125,
+      882,
+      863
+    ]
+  },
+  "layer-die": {
+    "source": "layer-top.png",
+    "inset_pct": 29.5
+  },
+  "layer-interposer": {
+    "source": "procedural"
+  },
+  "layer-substrate": {
+    "source": "procedural"
+  },
+  "layer-bga": {
+    "source": "procedural"
+  },
+  "die-emissive": {
+    "source": "layer-die.png luminance"
+  },
+  "fallback-exploded.png": {
+    "source": "separated-layers.png"
+  },
+  "fallback-assembled.png": {
+    "source": "after-rotate.png"
+  }
+}

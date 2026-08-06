@@ -1,0 +1,125 @@
+@import "tailwindcss";
+
+@theme {
+  /* Substrate — the page is nearly black so the chip is the only light source. */
+  --color-void: #050507;
+  --color-carbon: #0b0b0f;
+  --color-graphite: #131318;
+  --color-edge: #1e1e26;
+
+  --color-chalk: #eceef3;
+  --color-mute: #9a9daa;
+  --color-faint: #6b6e7b;
+
+  /* One accent per chip layer. */
+  --color-cyan: #7dd3fc;
+  --color-gold: #c7a24a;
+  --color-violet: #a78bfa;
+  --color-emerald: #34d399;
+  --color-amber: #f0b429;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono-face), ui-monospace, "SF Mono", monospace;
+}
+
+:root {
+  --accent-cyan: #7dd3fc;
+  --accent-gold: #c7a24a;
+  --accent-violet: #a78bfa;
+  --accent-emerald: #34d399;
+  --accent-amber: #f0b429;
+
+  --shell: clamp(1.25rem, 5vw, 5rem);
+  color-scheme: dark;
+}
+
+/* Deliberately NOT `scroll-behavior: smooth` — it fights ScrollTrigger and
+   makes scrubbed timelines track erratically. Lenis provides the smoothing,
+   and reduced-motion users get native instant jumps. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  background: var(--color-void);
+  color: var(--color-chalk);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  /* The 3D stage is fixed behind everything; never let the page scroll sideways. */
+  overflow-x: hidden;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--accent-cyan) 30%, transparent);
+  color: #fff;
+}
+
+/* Keyboard focus has to survive a dark, low-contrast design. */
+:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Primitives                                                                 */
+/* -------------------------------------------------------------------------- */
+
+.shell {
+  width: 100%;
+  max-width: 78rem;
+  margin-inline: auto;
+  padding-inline: var(--shell);
+}
+
+/* Content sits over the WebGL stage, so it needs its own readability floor. */
+.panel {
+  background: color-mix(in oklab, var(--color-carbon) 82%, transparent);
+  border: 1px solid var(--color-edge);
+  border-radius: 14px;
+  backdrop-filter: blur(14px);
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-faint);
+}
+
+.rule {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-edge) 15%,
+    var(--color-edge) 85%,
+    transparent
+  );
+}
+
+/* Scroll-driven marching pulse on the SVG circuit traces. */
+@keyframes trace-pulse {
+  to {
+    stroke-dashoffset: -220;
+  }
+}
+
+.trace-live {
+  animation: trace-pulse 3.4s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trace-live {
+    animation: none;
+  }
+}
+
+/* Thin scrollbar so the dark field isn't broken by a bright gutter. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-edge) transparent;
+}
