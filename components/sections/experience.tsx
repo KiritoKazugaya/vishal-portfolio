@@ -111,7 +111,7 @@ function Card({ item }: { item: ExperienceItem }) {
               onClick={() => flip(true)}
             >
               <BarChart3 className={s.flipIcon} aria-hidden />
-              Metrics
+              Click for metrics
               <span className="sr-only">
                 {" "}
                 for {item.role}, {item.org}
@@ -182,7 +182,7 @@ function Card({ item }: { item: ExperienceItem }) {
               onClick={() => flip(false)}
             >
               <Undo2 className={s.flipIcon} aria-hidden />
-              Overview
+              Back to overview
               <span className="sr-only">
                 {" "}
                 for {item.role}, {item.org}

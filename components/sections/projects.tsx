@@ -11,14 +11,16 @@ import type { Project, ProjectCategory } from "@/lib/types"
 import s from "./projects.module.css"
 
 const AUTOPLAY_MS = 2000
+/** Cards further out than this are not rendered — they are behind the stack. */
+const VISIBLE_DEPTH = 3
 
 export function Projects() {
   const [open, setOpen] = useState<Project | null>(null)
   const [filter, setFilter] = useState<ProjectCategory | null>(null)
-
-  const trackRef = useRef<HTMLDivElement>(null)
+  const [active, setActive] = useState(0)
   const [held, setHeld] = useState(false)
   const reduced = useReducedMotion()
+  const stageRef = useRef<HTMLDivElement>(null)
 
   const visible = useMemo(
     () => (filter ? projects.filter((p) => p.category === filter) : projects),
@@ -31,41 +33,52 @@ export function Projects() {
     return m
   }, [])
 
-  /** Advance exactly one card, wrapping at either end. */
-  const nudge = useCallback(
-    (dir: 1 | -1) => {
-      const el = trackRef.current
-      if (!el) return
-      const kids = el.children
-      // Distance between two card origins already includes the gap — no maths on it.
-      const step =
-        kids.length > 1
-          ? (kids[1] as HTMLElement).offsetLeft - (kids[0] as HTMLElement).offsetLeft
-          : el.clientWidth
-      const max = el.scrollWidth - el.clientWidth
-      if (max <= 2) return
+  const n = visible.length
 
-      let next = el.scrollLeft + dir * step
-      if (dir > 0 && el.scrollLeft >= max - 2) next = 0
-      if (dir < 0 && el.scrollLeft <= 2) next = max
-
-      el.scrollTo({ left: next, behavior: reduced ? "auto" : "smooth" })
-    },
-    [reduced],
+  const go = useCallback(
+    (dir: 1 | -1) => setActive((a) => (a + dir + n) % n),
+    [n],
   )
 
-  // Autoplay. Stops for reduced motion, hover, focus-within, touch drag and the modal.
+  /**
+   * Signed distance from the active card, wrapped.
+   *
+   * This is what makes it an actual carousel rather than a strip with ends:
+   * the card three past the last one is the third from the front, so the arc
+   * never runs out on either side.
+   */
+  const offsetOf = useCallback(
+    (i: number) => {
+      let d = i - active
+      if (d > n / 2) d -= n
+      if (d < -n / 2) d += n
+      return d
+    },
+    [active, n],
+  )
+
   const paused = held || open !== null || !!reduced
   useEffect(() => {
-    if (paused) return
-    const id = window.setInterval(() => nudge(1), AUTOPLAY_MS)
+    if (paused || n < 2) return
+    const id = window.setInterval(() => go(1), AUTOPLAY_MS)
     return () => window.clearInterval(id)
-  }, [paused, nudge, filter])
+  }, [paused, go, n])
 
-  // A new filter renders a new set — start it at the beginning.
-  useEffect(() => {
-    trackRef.current?.scrollTo({ left: 0 })
-  }, [filter])
+  /** A new filter renders a different set, so bring it back to the front. */
+  const changeFilter = useCallback((next: ProjectCategory | null) => {
+    setFilter(next)
+    setActive(0)
+  }, [])
+
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "ArrowRight") {
+      e.preventDefault()
+      go(1)
+    } else if (e.key === "ArrowLeft") {
+      e.preventDefault()
+      go(-1)
+    }
+  }
 
   return (
     <Chapter
@@ -85,7 +98,7 @@ export function Projects() {
             on={filter === null}
             label="all"
             count={projects.length}
-            onClick={() => setFilter(null)}
+            onClick={() => changeFilter(null)}
           />
           {projectCategories.map((c) => (
             <Tab
@@ -93,18 +106,18 @@ export function Projects() {
               on={filter === c}
               label={c.toLowerCase()}
               count={counts.get(c) ?? 0}
-              onClick={() => setFilter(filter === c ? null : c)}
+              onClick={() => changeFilter(filter === c ? null : c)}
             />
           ))}
         </div>
 
         <p className="sr-only" aria-live="polite">
-          {visible.length} project{visible.length === 1 ? "" : "s"} shown
+          {visible[active]?.title}. Card {active + 1} of {n}
           {filter ? ` in ${filter}` : ""}.
         </p>
 
         <div
-          className="relative mt-6"
+          className="relative"
           onMouseEnter={() => setHeld(true)}
           onMouseLeave={() => setHeld(false)}
           onFocusCapture={() => setHeld(true)}
@@ -113,32 +126,59 @@ export function Projects() {
           onTouchEnd={() => setHeld(false)}
           onTouchCancel={() => setHeld(false)}
         >
-          <div className={s.viewport}>
-            <div
-              ref={trackRef}
-              className={`${s.track} no-bar`}
-              tabIndex={0}
-              role="region"
-              aria-roledescription="carousel"
-              aria-label="Project cards — scroll or use the previous and next buttons"
-            >
-              {visible.map((p) => (
-                <Card key={p.slug} project={p} onOpen={() => setOpen(p)} />
-              ))}
+          {/* The arc. Perspective lives on the stage; every card is placed by
+              its signed distance from centre, so nothing has to be measured. */}
+          <div
+            ref={stageRef}
+            className={s.stage}
+            tabIndex={0}
+            role="region"
+            aria-roledescription="carousel"
+            aria-label="Projects — use the left and right arrow keys"
+            onKeyDown={onKeyDown}
+          >
+            <div className={s.arc}>
+              {visible.map((p, i) => {
+                const d = offsetOf(i)
+                const far = Math.abs(d) > VISIBLE_DEPTH
+                const centre = d === 0
+                return (
+                  <div
+                    key={p.slug}
+                    className={s.slot}
+                    data-centre={centre}
+                    aria-hidden={far || undefined}
+                    style={
+                      {
+                        "--d": d,
+                        "--ad": Math.abs(d),
+                        zIndex: 50 - Math.abs(d),
+                        visibility: far ? "hidden" : "visible",
+                      } as CSSProperties
+                    }
+                  >
+                    <Card
+                      project={p}
+                      centre={centre}
+                      onActivate={() => (centre ? setOpen(p) : setActive(i))}
+                    />
+                  </div>
+                )
+              })}
             </div>
           </div>
 
-          <div className="mt-1 flex items-center justify-between gap-4">
+          <div className="mt-4 flex items-center justify-between gap-4">
             <p className="font-mono text-[0.68rem] text-faint">
-              {paused && !reduced ? "paused" : reduced ? "auto-scroll off" : "auto-scrolling"}
+              {reduced ? "auto-advance off" : paused ? "paused" : "auto-advancing"}
               <span className="text-edge"> · </span>
-              drag, scroll or use the arrows
+              {active + 1}/{n}
             </p>
             <div className="flex gap-2">
-              <Arrow label="Previous project" onClick={() => nudge(-1)}>
+              <Arrow label="Previous project" onClick={() => go(-1)}>
                 <ArrowLeft className="h-4 w-4" aria-hidden />
               </Arrow>
-              <Arrow label="Next project" onClick={() => nudge(1)}>
+              <Arrow label="Next project" onClick={() => go(1)}>
                 <ArrowRight className="h-4 w-4" aria-hidden />
               </Arrow>
             </div>
@@ -214,7 +254,15 @@ function repoPath(project: Project) {
     : project.slug
 }
 
-function Card({ project, onOpen }: { project: Project; onOpen: () => void }) {
+function Card({
+  project,
+  centre,
+  onActivate,
+}: {
+  project: Project
+  centre: boolean
+  onActivate: () => void
+}) {
   const accent = `var(${project.accent})`
   const style = { "--card-accent": accent } as CSSProperties
   const langs = project.languages
@@ -222,53 +270,99 @@ function Card({ project, onOpen }: { project: Project; onOpen: () => void }) {
   return (
     <button
       type="button"
-      onClick={onOpen}
-      aria-haspopup="dialog"
-      aria-label={`${project.title} — open case study`}
+      onClick={onActivate}
+      aria-haspopup={centre ? "dialog" : undefined}
+      aria-label={
+        centre
+          ? `${project.title} — open case study`
+          : `Bring ${project.title} to the front`
+      }
+      /* Only the front card takes tab focus; the arrows and arrow keys are the
+         keyboard path through the rest, so Tab does not walk ten cards. */
+      tabIndex={centre ? 0 : -1}
       style={style}
-      className={`glass glass-lift ${s.card}`}
+      className={`glass ${s.card}`}
     >
-      <div className="flex items-center justify-between gap-3">
+      <header className="flex items-center justify-between gap-3">
         <span className="eyebrow truncate" style={{ color: accent }}>
           {project.domain}
         </span>
-        <span className="shrink-0 font-mono text-[0.65rem] text-faint">{project.year}</span>
-      </div>
+        <span className="shrink-0 font-mono text-[0.68rem] text-faint">{project.year}</span>
+      </header>
 
-      <h3 className="inlay mt-3 text-[1.05rem] font-semibold leading-snug">{project.title}</h3>
-      <p className="mt-2 text-sm leading-relaxed text-mute">{project.tagline}</p>
+      <h3 className={`inlay ${s.title}`}>{project.title}</h3>
+      <p className={s.tagline}>{project.tagline}</p>
 
-      {/* Topic chips, GitHub-style — squared, not the pill shape Skills uses. */}
-      <div className="mt-4 flex flex-wrap gap-1.5">
-        {project.tech.slice(0, 3).map((t) => (
-          <span
-            key={t}
-            className="rounded-[4px] border border-edge px-1.5 py-0.5 font-mono text-[0.62rem] text-faint"
-          >
+      <div className={s.hr} aria-hidden />
+
+      <section>
+        <p className="eyebrow">The problem</p>
+        <p className={`${s.body} ${s.clamp2}`}>{project.problem}</p>
+      </section>
+
+      {project.metrics.length ? (
+        <dl className={s.metrics}>
+          {project.metrics.slice(0, 3).map((m) => (
+            <div key={m.label} className={s.metric}>
+              <dd className={s.metricVal}>
+                {m.value}
+                {m.suffix ?? ""}
+                {m.assumed ? <span className={s.est}>*</span> : null}
+              </dd>
+              <dt className={s.metricLabel}>{m.label}</dt>
+            </div>
+          ))}
+        </dl>
+      ) : null}
+
+      {project.decisions.length ? (
+        <section className={s.decision}>
+          <p className="eyebrow">Key decision</p>
+          <p className={`${s.body} ${s.clamp2}`}>{project.decisions[0]}</p>
+        </section>
+      ) : null}
+
+      {project.architecture.length ? (
+        <section className={s.pipeSection}>
+          <p className="eyebrow">Pipeline</p>
+          {/* Four stages, then a count. Five names wrap to a third line on the
+              longest cards and push the footer out of the card. */}
+          <ol className={s.pipeline}>
+            {project.architecture.slice(0, 4).map((step, i) => (
+              <li key={step.title}>
+                {i > 0 ? (
+                  <span className={s.arrow} aria-hidden>
+                    →
+                  </span>
+                ) : null}
+                <span className={s.stage_}>{step.title}</span>
+              </li>
+            ))}
+            {project.architecture.length > 4 ? (
+              <li>
+                <span className={s.arrow} aria-hidden>
+                  →
+                </span>
+                <span className={s.stage_}>+{project.architecture.length - 4}</span>
+              </li>
+            ) : null}
+          </ol>
+        </section>
+      ) : null}
+
+      <div className={s.chips}>
+        {project.tech.slice(0, 6).map((t) => (
+          <span key={t} className={s.chip}>
             {t}
           </span>
         ))}
-        {project.tech.length > 3 ? (
-          <span className="py-0.5 font-mono text-[0.62rem] text-faint">
-            +{project.tech.length - 3}
-          </span>
+        {project.tech.length > 6 ? (
+          <span className={s.chipMore}>+{project.tech.length - 6}</span>
         ) : null}
       </div>
 
-      {/* Everything below is pinned to the bottom so footers align across cards. */}
-      <div className="mt-auto w-full pt-5">
-        <div className="mb-3 flex items-center gap-2 font-mono text-[0.66rem]">
-          {project.repo ? (
-            <GitBranch className="h-3 w-3 shrink-0 text-faint" aria-hidden />
-          ) : (
-            <Lock className="h-3 w-3 shrink-0 text-faint" aria-hidden />
-          )}
-          <span className="truncate text-mute">{repoPath(project)}</span>
-          <span className="ml-auto shrink-0 text-faint">
-            {project.repo ? "public" : "source not public"}
-          </span>
-        </div>
-
+      {/* Pinned to the bottom so footers line up across every card. */}
+      <footer className={s.footer}>
         {langs.length ? (
           <>
             <div className={s.langBar} role="img" aria-label={langLabel(langs)}>
@@ -280,45 +374,34 @@ function Card({ project, onOpen }: { project: Project; onOpen: () => void }) {
                 />
               ))}
             </div>
-
-            <ul className="mt-2.5 flex flex-wrap gap-x-3 gap-y-1" aria-hidden>
+            <ul className={s.legend} aria-hidden>
               {langs.map((l) => (
-                <li key={l.name} className="flex items-center gap-1.5">
+                <li key={l.name}>
                   <span className={s.dot} style={{ background: l.color, color: l.color }} />
-                  <span className="text-[0.68rem] text-mute">{l.name}</span>
-                  <span className="font-mono text-[0.62rem] text-faint">{l.pct}%</span>
+                  <span className={s.legendName}>{l.name}</span>
+                  <span className={s.legendPct}>{l.pct}%</span>
                 </li>
               ))}
             </ul>
           </>
         ) : null}
 
-        <div className="mt-4 flex items-center justify-between gap-3 border-t border-edge pt-3">
-          {/* Ticks are the real architecture stages from the case study. */}
-          <span className="flex items-center gap-2">
-            <span className={s.ticks} aria-hidden>
-              {project.architecture.map((step, i) => (
-                <span
-                  key={step.title}
-                  className={s.tick}
-                  style={{ height: `${5 + ((i * 3) % 7)}px` }}
-                />
-              ))}
-            </span>
-            <span className="font-mono text-[0.62rem] text-faint">
-              {project.architecture.length} stages
-            </span>
+        <div className={s.footRow}>
+          <span className={s.repo}>
+            {project.repo ? (
+              <GitBranch className="h-3.5 w-3.5 shrink-0 text-faint" aria-hidden />
+            ) : (
+              <Lock className="h-3.5 w-3.5 shrink-0 text-faint" aria-hidden />
+            )}
+            <span className="truncate">{repoPath(project)}</span>
           </span>
 
-          <span
-            className="inline-flex items-center gap-1 text-[0.72rem] font-medium"
-            style={{ color: accent }}
-          >
-            case study
+          <span className={s.cta} style={{ color: accent }}>
+            {project.demo ? "live · case study" : "case study"}
             <span aria-hidden>→</span>
           </span>
         </div>
-      </div>
+      </footer>
     </button>
   )
 }

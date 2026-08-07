@@ -1,5 +1,5 @@
 /*
- * Projects — carousel rail, terminal-style filter rail, GitHub-style repo footer.
+ * Projects — 3D coverflow arc, terminal-style filter rail, GitHub-style footer.
  * Scoped to this section; nothing here leaks into globals.
  */
 
@@ -9,7 +9,7 @@
 /*  Deliberately NOT the rounded pills the Skills section uses. Same job,       */
 /*  different instrument: a monospace, bracketed terminal rail with a sliding   */
 /*  gold underline, so scrolling from Skills to Projects does not feel like     */
-/*  the same control rendered twice.                                           */
+/*  the same control rendered twice.                                            */
 /* -------------------------------------------------------------------------- */
 
 .rail {
@@ -39,7 +39,6 @@
   transition: color 0.25s ease;
 }
 
-/* The sliding rule. Grows from the centre so it reads as a selector, not a link. */
 .tab::after {
   content: "";
   position: absolute;
@@ -102,63 +101,255 @@
   opacity: 0.75;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .tab,
-  .tab::after,
-  .bracket {
-    transition: none;
+/* -------------------------------------------------------------------------- */
+/*  Coverflow arc                                                              */
+/* -------------------------------------------------------------------------- */
+
+/*
+ * Cards are placed by their signed distance from the centre (--d), so the whole
+ * arc is one transform per card and nothing needs measuring. Perspective sits
+ * on the stage; each slot rotates and recedes on its own.
+ */
+.stage {
+  --card-w: min(88vw, clamp(21rem, 37vw, 32rem));
+  --step: clamp(7rem, 12.5vw, 14.5rem);
+  --depth: clamp(90px, 9vw, 170px);
+  --tilt: 27deg;
+
+  position: relative;
+  /* Floor is 35rem, not 33: a 330px-wide card wraps the same copy into enough
+     extra lines that 33rem clipped the footer by a few pixels on a phone. */
+  height: clamp(35rem, 50vh + 13rem, 42rem);
+  margin-top: clamp(1.25rem, 2.5vw, 2rem);
+  perspective: 1900px;
+  perspective-origin: 50% 46%;
+  /* The arc reaches past the column; clip it here rather than on the page. */
+  overflow: hidden;
+  outline: none;
+}
+
+.stage:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 6px;
+  border-radius: 18px;
+}
+
+.arc {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+
+.slot {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: var(--card-w);
+  height: 100%;
+  margin-left: calc(var(--card-w) / -2);
+  transform-style: preserve-3d;
+  transform: translateX(calc(var(--d) * var(--step)))
+    translateZ(calc(var(--ad) * var(--depth) * -1))
+    rotateY(calc(var(--d) * var(--tilt) * -1))
+    scale(calc(1 - var(--ad) * 0.05));
+  opacity: calc(1 - var(--ad) * 0.22);
+  transition:
+    transform 0.62s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.62s ease;
+}
+
+/* Everything behind the front card dims and stops competing for attention. */
+.slot:not([data-centre="true"]) .card {
+  filter: saturate(0.72) brightness(0.78);
+}
+
+.slot[data-centre="true"] .card {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.55),
+    0 40px 70px -30px rgba(0, 0, 0, 1),
+    0 0 0 1px color-mix(in oklab, var(--card-accent, var(--accent-cyan)) 26%, transparent);
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Card                                                                       */
+/* -------------------------------------------------------------------------- */
+
+.card {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  flex-direction: column;
+  gap: clamp(0.45rem, 0.78vw, 0.72rem);
+  overflow: hidden;
+  padding: clamp(1rem, 1.7vw, 1.55rem);
+  text-align: left;
+  cursor: pointer;
+  transition: filter 0.5s ease, box-shadow 0.5s ease;
+}
+
+.title {
+  font-size: clamp(1.15rem, 1.7vw, 1.65rem);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  padding-bottom: 0.06em;
+}
+
+.tagline {
+  font-size: clamp(0.8rem, 0.95vw, 0.95rem);
+  line-height: 1.5;
+  color: var(--color-mute);
+}
+
+.hr {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--card-accent, var(--accent-cyan)) 45%, transparent),
+    var(--color-edge) 40%,
+    transparent
+  );
+}
+
+.body {
+  margin-top: 0.35rem;
+  font-size: clamp(0.76rem, 0.9vw, 0.88rem);
+  line-height: 1.55;
+  color: var(--color-mute);
+}
+
+.clamp2,
+.clamp3 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.clamp2 {
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.clamp3 {
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+}
+
+/* ------------------------------------------------------------- metrics ---- */
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.metric {
+  border: 1px solid var(--color-edge);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.015);
+  padding: 0.5rem 0.4rem;
+  text-align: center;
+}
+
+.metricVal {
+  font-family: var(--font-mono);
+  font-size: clamp(0.95rem, 1.3vw, 1.25rem);
+  line-height: 1.1;
+  color: var(--color-chalk);
+}
+
+.est {
+  vertical-align: super;
+  font-size: 0.55em;
+  color: var(--color-faint);
+}
+
+.metricLabel {
+  margin-top: 0.3rem;
+  font-size: clamp(0.6rem, 0.7vw, 0.68rem);
+  line-height: 1.25;
+  color: var(--color-faint);
+}
+
+/* ------------------------------------------------------------ decision ---- */
+
+.decision {
+  border-left: 2px solid color-mix(in oklab, var(--card-accent, var(--accent-cyan)) 60%, transparent);
+  padding-left: 0.75rem;
+}
+
+/* ------------------------------------------------------------ pipeline ---- */
+
+/*
+ * Dropped on phones. It is the most variable block on the card — five stage
+ * names wrap to three lines at 330px — and it was the difference between the
+ * longest cards fitting and clipping their own footer.
+ */
+@media (max-width: 40rem) {
+  .pipeSection {
+    display: none;
   }
 }
 
-/* -------------------------------------------------------------------------- */
-/*  Carousel                                                                   */
-/* -------------------------------------------------------------------------- */
-
-.viewport {
-  /* Cards dissolve at the rail edges instead of being guillotined by overflow. */
-  -webkit-mask-image: linear-gradient(
-    90deg,
-    transparent 0,
-    #000 2.5%,
-    #000 97.5%,
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    90deg,
-    transparent 0,
-    #000 2.5%,
-    #000 97.5%,
-    transparent 100%
-  );
-}
-
-.track {
+.pipeline {
   display: flex;
-  align-items: stretch;
-  gap: clamp(0.75rem, 1.4vw, 1.25rem);
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  scroll-snap-type: x mandatory;
-  scroll-padding-inline-start: 2px;
-  /* Vertical room so the hover lift and its drop shadow are not clipped. */
-  padding: 0.75rem 2px 1.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.2rem 0.3rem;
+  margin-top: 0.4rem;
 }
 
-.card {
-  flex: 0 0 auto;
-  width: clamp(15.5rem, 26vw, 22rem);
-  max-width: 100%;
-  scroll-snap-align: start;
+.pipeline li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.arrow {
+  color: color-mix(in oklab, var(--card-accent, var(--accent-cyan)) 65%, transparent);
+  font-size: 0.7rem;
+}
+
+.stage_ {
+  font-family: var(--font-mono);
+  font-size: clamp(0.6rem, 0.72vw, 0.7rem);
+  letter-spacing: 0.02em;
+  color: var(--color-mute);
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------------------- chips ---- */
+
+.chips {
   display: flex;
-  flex-direction: column;
-  text-align: left;
-  padding: clamp(1rem, 1.5vw, 1.35rem);
-  cursor: pointer;
+  flex-wrap: wrap;
+  gap: 0.3rem;
 }
 
-/* -------------------------------------------------------------------------- */
-/*  Repo footer                                                                */
-/* -------------------------------------------------------------------------- */
+.chip,
+.chipMore {
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: clamp(0.6rem, 0.72vw, 0.7rem);
+  color: var(--color-faint);
+}
+
+.chip {
+  border: 1px solid var(--color-edge);
+  padding: 0.15rem 0.4rem;
+}
+
+.chipMore {
+  padding: 0.15rem 0.15rem;
+}
+
+/* -------------------------------------------------------------- footer ---- */
+
+.footer {
+  margin-top: auto;
+  padding-top: clamp(0.6rem, 1vw, 0.9rem);
+}
 
 .langBar {
   display: flex;
@@ -179,6 +370,19 @@
   filter: brightness(1.22) saturate(1.15);
 }
 
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
 .dot {
   width: 8px;
   height: 8px;
@@ -187,24 +391,59 @@
   box-shadow: 0 0 6px -1px currentColor;
 }
 
-/* One tick per real architecture stage — derived from the case study, not invented. */
-.ticks {
-  display: flex;
-  align-items: flex-end;
-  gap: 2px;
-  height: 11px;
+.legendName {
+  font-size: clamp(0.62rem, 0.75vw, 0.72rem);
+  color: var(--color-mute);
 }
 
-.tick {
-  width: 3px;
-  border-radius: 1px;
-  background: color-mix(in oklab, var(--card-accent, var(--accent-cyan)) 55%, transparent);
-  transition: height 0.3s ease;
+.legendPct {
+  font-family: var(--font-mono);
+  font-size: clamp(0.58rem, 0.68vw, 0.66rem);
+  color: var(--color-faint);
 }
+
+.footRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.7rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--color-edge);
+}
+
+.repo {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: clamp(0.6rem, 0.72vw, 0.7rem);
+  color: var(--color-mute);
+}
+
+.cta {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: clamp(0.68rem, 0.8vw, 0.78rem);
+  font-weight: 500;
+}
+
+/* -------------------------------------------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
+  .slot,
+  .card,
   .langSeg,
-  .tick {
+  .tab,
+  .tab::after,
+  .bracket {
     transition: none;
+  }
+  /* Flat stack instead of a rotated arc — depth without the motion. */
+  .slot {
+    transform: translateX(calc(var(--d) * var(--step))) scale(calc(1 - var(--ad) * 0.05));
   }
 }

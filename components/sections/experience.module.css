@@ -279,6 +279,12 @@
  * against `.face`, so the whole card is the hit target while the real control
  * stays a small, labelled, focusable button.
  */
+/*
+ * This was bare text with a small icon — it read as a caption, and people did
+ * not realise the card turns over. It is now shaped like a button: tinted fill,
+ * accent border, and a label that says what the click DOES rather than naming
+ * the destination.
+ */
 .flip {
   position: static;
   align-self: flex-start;
@@ -286,16 +292,46 @@
   align-items: center;
   gap: 0.5rem;
   margin-top: auto; /* always pins to the bottom edge, so rows line up */
-  padding: clamp(1rem, 1.5vw, 1.3rem) 0 0.15rem;
-  border: 0;
-  background: none;
+  padding: 0.6rem 1rem;
+  border: 1px solid color-mix(in oklab, var(--card-accent) 42%, transparent);
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--card-accent) 11%, transparent);
   cursor: pointer;
   font-family: var(--font-mono);
-  font-size: clamp(0.62rem, 0.75vw, 0.7rem);
-  letter-spacing: 0.18em;
+  font-size: clamp(0.63rem, 0.76vw, 0.71rem);
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: color-mix(in oklab, var(--card-accent) 60%, #fff);
-  transition: color 0.3s ease;
+  color: color-mix(in oklab, var(--card-accent) 72%, #fff);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    color 0.3s ease,
+    transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card:hover .flip,
+.flip:focus-visible {
+  background: color-mix(in oklab, var(--card-accent) 26%, transparent);
+  border-color: color-mix(in oklab, var(--card-accent) 78%, transparent);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+/* `.face` has no row gap and `margin-top: auto` collapses to zero on a full
+   card, so the guaranteed breathing room sits on the elements above it. */
+.tags,
+.note {
+  margin-bottom: clamp(0.9rem, 1.4vw, 1.25rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flip,
+  .card:hover .flip,
+  .flip:focus-visible {
+    transition: none;
+    transform: none;
+  }
 }
 
 .flip::after {
