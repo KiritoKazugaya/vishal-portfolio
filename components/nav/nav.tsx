@@ -77,36 +77,47 @@ export function LayerRail() {
 
   return (
     <nav aria-label="Chapters" className={s.rail}>
-      <div className="glass px-2.5 py-3">
-        <ol className={s.list}>
-          <span className={s.spine} aria-hidden />
+      <ol
+        className={s.list}
+        style={
+          {
+            "--i": active,
+            "--n": LAYERS.length,
+            "--lit": LAYERS[active]?.accent ?? LAYERS[0].accent,
+          } as CSSProperties
+        }
+      >
+        {/* Board trace: the dim run, the energised length, and the charge
+            sitting where the current has reached. */}
+        <span className={s.spine} aria-hidden />
+        <span className={s.spineLive} aria-hidden />
+        <span className={s.spark} aria-hidden />
 
-          {LAYERS.map((layer, i) => {
-            const isActive = i === active
-            return (
-              <li key={layer.id}>
-                <button
-                  type="button"
-                  onClick={() => scrollToLayer(layer.id)}
-                  data-active={isActive}
-                  aria-current={isActive ? "true" : undefined}
-                  className={s.item}
-                  style={{ "--pin": layer.accent } as CSSProperties}
-                >
-                  <span className={s.padWrap} aria-hidden>
-                    <span className={s.pad} />
-                  </span>
-                  <span className={s.num} aria-hidden>
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  <span className={s.label}>{layer.label}</span>
-                  <span className={s.lead} aria-hidden />
-                </button>
-              </li>
-            )
-          })}
-        </ol>
-      </div>
+        {LAYERS.map((layer, i) => {
+          const isActive = i === active
+          return (
+            <li key={layer.id}>
+              <button
+                type="button"
+                onClick={() => scrollToLayer(layer.id)}
+                data-active={isActive}
+                aria-current={isActive ? "true" : undefined}
+                className={s.item}
+                style={{ "--pin": layer.accent } as CSSProperties}
+              >
+                <span className={s.padWrap} aria-hidden>
+                  <span className={s.pad} />
+                </span>
+                <span className={s.stub} aria-hidden />
+                <span className={s.num} aria-hidden>
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <span className={s.label}>{layer.label}</span>
+              </button>
+            </li>
+          )
+        })}
+      </ol>
     </nav>
   )
 }
