@@ -546,6 +546,52 @@ const RAW_PROJECTS: RawProject[] = [
     demo: "https://www.mariposa.care",
     note: "Client web work, built on WordPress and Elementor rather than a coded front end — included here as delivery work, not as an engineering piece.",
   },
+  {
+    slug: "great-scoops",
+    title: "Great Scoops",
+    tagline: "Storefront, menu and ordering funnel for a local ice cream shop.",
+    domain: "Client Web",
+    year: "2026",
+    accent: "--accent-amber",
+    tech: [
+      "GoDaddy Website Builder",
+      "Responsive layout",
+      "Contact forms",
+      "reCAPTCHA",
+      "Re:amaze",
+      "Email capture",
+    ],
+    problem:
+      "An independent ice cream shop in the Gainesville area had no web presence. Customers could not see the menu, the prices, or the opening hours without turning up at the counter, and there was no way to reach the shop outside its hours.",
+    goal:
+      "Get the shop online quickly on a platform the owner could keep editing without a developer, with the menu and a way to make contact as the two things everything points at.",
+    architecture: [
+      { title: "Structure", detail: "A single scrolling page: hero, flavours, gallery, menu, contact, and a newsletter close." },
+      { title: "Menu", detail: "Prices grouped into four boards — ice creams, smoothies, milkshakes and sundaes — so a customer finds a price without hunting." },
+      { title: "Capture", detail: "A contact form with file attachments, plus a newsletter sign-up offering a first-purchase discount." },
+      { title: "Trust", detail: "Address, map and today's opening hours sit directly beside the form, so the page answers 'are you open now' before it asks for anything." },
+      { title: "Support", detail: "A live chat widget catches questions the page does not already answer." },
+    ],
+    decisions: [
+      "Built on the platform the owner asked for rather than a coded front end. A shop that has to phone a developer to change a price will simply stop updating the site.",
+      "The menu is the centre of the page, not a sub-page — it is the single thing customers arrive wanting, and burying it behind navigation costs more than it saves.",
+      "Three separate ways to convert — order, message, subscribe — because a walk-in business, an enquiry and a returning customer are three different intentions.",
+    ],
+    challenges:
+      "Working inside a template builder means the layout you want and the layout the tool offers are rarely the same thing. Most of the effort went into making a stock template not look like one.",
+    result:
+      "Live at greatscoops1.com, carrying the shop's full menu, hours, location and contact routes — and the owner can update prices without calling anyone.",
+    learned:
+      "Picking the boring platform is a design decision, not a shortcut. The right question was not what I would enjoy building, it was what the shop could still maintain a year later.",
+    metrics: [
+      { label: "Menu boards", value: 4 },
+      { label: "Page sections", value: 6 },
+      { label: "Conversion paths", value: 3 },
+    ],
+    repo: null,
+    demo: "https://greatscoops1.com",
+    note: "Built on GoDaddy's site builder at the owner's request, so the shop could maintain it themselves — included as client delivery work, not as an engineering piece.",
+  },
 ]
 
 /* -------------------------------------------------------------------------- */
@@ -569,6 +615,7 @@ const CATEGORY: Record<string, ProjectCategory> = {
   "vendor-price-scraper": "Data",
   "oceans-smoke-shop": "Full-Stack",
   "mariposa-care": "Full-Stack",
+  "great-scoops": "Full-Stack",
   "whatsapp-supplement-agent": "Automation",
 }
 
