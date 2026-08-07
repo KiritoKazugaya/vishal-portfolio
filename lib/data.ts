@@ -592,6 +592,52 @@ const RAW_PROJECTS: RawProject[] = [
     demo: "https://greatscoops1.com",
     note: "Built on GoDaddy's site builder at the owner's request, so the shop could maintain it themselves — included as client delivery work, not as an engineering piece.",
   },
+  {
+    slug: "cuts-and-brows",
+    title: "Cuts & Brows",
+    tagline: "Services, pricing and booking for a Gainesville salon.",
+    domain: "Client Web",
+    year: "2026",
+    accent: "--accent-violet",
+    tech: [
+      "GoDaddy Website Builder",
+      "Multi-page IA",
+      "WhatsApp Business",
+      "Contact forms",
+      "reCAPTCHA",
+      "Local SEO",
+    ],
+    problem:
+      "A salon competing in a university town where almost every customer checks price and availability on a phone before booking. Without a site, every one of those questions became a phone call the salon had to answer during an appointment.",
+    goal:
+      "Put services, prices and every way of reaching the salon online, and make the student pricing that differentiates it impossible to miss.",
+    architecture: [
+      { title: "Separate", detail: "Home, Services, Gallery, Special Offers and Contact as distinct pages rather than one scroll." },
+      { title: "Price", detail: "A full service menu with prices, so a customer qualifies themselves before they get in touch." },
+      { title: "Discount", detail: "Student offers get their own page — microblading, lamination, waxing and threading each with their own rate." },
+      { title: "Reach", detail: "Phone, email, WhatsApp and a form, alongside address and today's opening hours." },
+      { title: "Show", detail: "A gallery carries the work, because in this trade the portfolio is the pitch." },
+    ],
+    decisions: [
+      "Multi-page here, single-page for the ice cream shop. A salon's service list is browsed and compared before booking; a scoop menu is glanced at. The structure should follow how the customer actually decides.",
+      "WhatsApp promoted to a first-class channel next to the phone number — for a walk-in business, a message gets answered between clients when a call cannot be.",
+      "Student pricing pulled onto its own page rather than buried in the menu. In a university town that is the differentiator, not a footnote.",
+    ],
+    challenges:
+      "Ranking locally for a service people search by name — 'eyebrow threading', 'brazilian wax' — while keeping the pages readable for the person who actually lands on them.",
+    result:
+      "Live at cutsandbrows.com with the full service menu, student offers, gallery and four routes to the salon.",
+    learned:
+      "The structure of a small-business site should mirror the decision the customer is making. Two shops, the same builder, and the right answer was a different shape for each.",
+    metrics: [
+      { label: "Pages", value: 5 },
+      { label: "Student offers", value: 4 },
+      { label: "Contact routes", value: 4 },
+    ],
+    repo: null,
+    demo: "https://cutsandbrows.com",
+    note: "Built on GoDaddy's site builder so the salon can maintain it themselves — included as client delivery work, not as an engineering piece.",
+  },
 ]
 
 /* -------------------------------------------------------------------------- */
@@ -616,6 +662,7 @@ const CATEGORY: Record<string, ProjectCategory> = {
   "oceans-smoke-shop": "Full-Stack",
   "mariposa-care": "Full-Stack",
   "great-scoops": "Full-Stack",
+  "cuts-and-brows": "Full-Stack",
   "whatsapp-supplement-agent": "Automation",
 }
 
