@@ -225,6 +225,49 @@
 /*  Top navigation                                                             */
 /* -------------------------------------------------------------------------- */
 
+/*
+ * Held back through the hero act, then it drops in and stays.
+ *
+ * Visibility is not enough on its own — a hidden-but-present bar still eats
+ * clicks over the hero copy, so pointer-events go with it, and `inert` on the
+ * element keeps it out of the tab order.
+ */
+.top {
+  position: fixed;
+  inset-inline: 0;
+  top: 0;
+  z-index: 40;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-0.9rem);
+  transition:
+    opacity 0.45s ease,
+    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+    backdrop-filter 0.45s ease;
+}
+
+.top[data-shown="true"] {
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+  /* Only once it is over content does it need to lift off the background. */
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  background: linear-gradient(
+    180deg,
+    rgba(5, 5, 7, 0.82) 0%,
+    rgba(5, 5, 7, 0.55) 62%,
+    rgba(5, 5, 7, 0) 100%
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .top {
+    transition: opacity 0.2s ease;
+    transform: none;
+  }
+}
+
 .topItem {
   position: relative;
   padding: 0.5rem 0.75rem;

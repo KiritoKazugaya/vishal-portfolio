@@ -5,18 +5,27 @@ import type { CSSProperties } from "react"
 import { LAYERS } from "@/lib/chip-config"
 import { contact, navItems, profile } from "@/lib/data"
 import { scrollToLayer } from "@/hooks/use-chip-timeline"
-import { useActiveLayer } from "@/hooks/use-active-layer"
+import { useActiveLayer, useHeroDone } from "@/hooks/use-active-layer"
 import s from "./nav.module.css"
 
 /**
- * Fixed navigation. The active item is whichever chip layer is currently
- * energised, so the nav and the 3D scene can never disagree.
+ * Fixed navigation, held back until the package has finished separating.
+ *
+ * During the hero act it has nothing to point at and simply sat over the chip
+ * and the opening copy, so it stays out of the way and drops in when the first
+ * chapter begins. `inert` while hidden keeps it out of the tab order too — a
+ * keyboard user should not land on links to sections that are not on screen yet.
  */
 export function Nav() {
   const active = useActiveLayer()
+  const shown = useHeroDone()
 
   return (
-    <header className="page-inset fixed inset-x-0 top-0 z-40">
+    <header
+      className={`page-inset ${s.top}`}
+      data-shown={shown}
+      inert={!shown}
+    >
       <nav
         aria-label="Primary"
         className="shell flex items-center justify-between gap-6 py-5"

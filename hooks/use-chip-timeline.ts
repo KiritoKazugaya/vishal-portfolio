@@ -5,7 +5,7 @@ import Lenis from "lenis"
 
 import { gsap, ScrollTrigger } from "@/lib/gsap"
 import { LAYERS, PHASES, layerIndex } from "@/lib/chip-config"
-import { chipState, setActiveLayer } from "@/lib/scroll-store"
+import { chipState, setActiveLayer, setHeroDone } from "@/lib/scroll-store"
 import type { LayerId } from "@/lib/types"
 
 interface Bound {
@@ -43,6 +43,8 @@ export function useChipTimeline(enabled: boolean) {
       LAYERS.forEach((l) => {
         chipState.focus[l.id] = 0.6
       })
+      // No scrubbed hero to pass through, so the nav is available immediately.
+      setHeroDone(true)
       return
     }
 
@@ -115,9 +117,13 @@ export function useChipTimeline(enabled: boolean) {
         end: "bottom bottom",
         scrub: true,
         invalidateOnRefresh: true,
+        // Also on refresh, so a reload part-way down the page (or a deep link)
+        // resolves the phase instead of waiting for the first scroll event.
+        onRefresh: (self) => setHeroDone(self.progress >= 0.995),
         onUpdate: (self) => {
           chipState.hero = self.progress
           chipState.direction = self.direction >= 0 ? 1 : -1
+          setHeroDone(self.progress >= 0.995)
 
           // Past the hero, the chapters own focus. Writing (and killing tweens)
           // unconditionally here would clobber the chapter cross-fade on every

@@ -1,7 +1,7 @@
 "use client"
 
 import { useSyncExternalStore } from "react"
-import { getActive, subscribeActive } from "@/lib/scroll-store"
+import { getActive, getHeroDone, subscribeActive } from "@/lib/scroll-store"
 
 /**
  * Reads the active layer from the chip store.
@@ -11,4 +11,14 @@ import { getActive, subscribeActive } from "@/lib/scroll-store"
  */
 export function useActiveLayer() {
   return useSyncExternalStore(subscribeActive, getActive, () => 0)
+}
+
+/**
+ * False while the package is still assembling and separating.
+ *
+ * Server snapshot is `false` so the nav is absent in the initial HTML — it must
+ * not flash over the hero before hydration decides where the reader is.
+ */
+export function useHeroDone() {
+  return useSyncExternalStore(subscribeActive, getHeroDone, () => false)
 }

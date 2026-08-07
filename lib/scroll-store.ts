@@ -58,13 +58,17 @@ export const chipState: ChipState = {
 
 const listeners = new Set<() => void>()
 
-/** Subscribe to active-layer changes. Used by useSyncExternalStore. */
+/** Subscribe to chapter/phase changes. Used by useSyncExternalStore. */
 export function subscribeActive(cb: () => void) {
   listeners.add(cb)
   return () => listeners.delete(cb)
 }
 
 export const getActive = () => chipState.active
+
+/** True once the package has finished separating and the chapters begin. */
+let heroDone = false
+export const getHeroDone = () => heroDone
 
 /**
  * Set the active layer and notify React.
@@ -78,6 +82,13 @@ export function setActiveLayer(index: number) {
   chipState.active = index
   listeners.forEach((cb) => cb())
   return true
+}
+
+/** Flip the hero phase. Called from the scrubbed hero trigger. */
+export function setHeroDone(done: boolean) {
+  if (heroDone === done) return
+  heroDone = done
+  listeners.forEach((cb) => cb())
 }
 
 /** Linear interpolation. */
