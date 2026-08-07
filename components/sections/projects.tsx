@@ -2,6 +2,7 @@
 
 import type { CSSProperties } from "react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { createPortal } from "react-dom"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import { ArrowLeft, ArrowRight, ExternalLink, GitBranch, Lock } from "lucide-react"
 
@@ -484,13 +485,21 @@ function Detail({
     scrollRef.current?.scrollTo({ top: 0 })
   }, [index])
 
-  return (
+  /*
+   * Portalled to <body>.
+   *
+   * `.chapter-scrim` sets `isolation: isolate`, which creates a stacking
+   * context — so a z-50 dialog rendered inside it is only z-50 *within that
+   * section*, and the fixed z-40 navigation still painted over the top of it.
+   * Escaping to the body root is what actually puts the dialog above the page.
+   */
+  return createPortal(
     <motion.div
       ref={scrollRef}
       /* Lenis must keep its hands off this scroller, or the wheel goes to the
          page it is supposed to be holding still. */
       data-lenis-prevent
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto overscroll-contain bg-void/85 p-4 backdrop-blur-sm md:p-8"
+      className="fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto overscroll-contain bg-void/90 p-4 backdrop-blur-md md:p-8"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -498,6 +507,33 @@ function Detail({
       onClick={onClose}
       role="presentation"
     >
+      {/* Lightbox-style steppers, so a reader moves through the case studies
+          without returning to the carousel between each one. */}
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation()
+          onStep(-1)
+        }}
+        aria-label="Previous case study"
+        className={s.sideArrow}
+        data-side="left"
+      >
+        <ArrowLeft className="h-5 w-5" aria-hidden />
+      </button>
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation()
+          onStep(1)
+        }}
+        aria-label="Next case study"
+        className={s.sideArrow}
+        data-side="right"
+      >
+        <ArrowRight className="h-5 w-5" aria-hidden />
+      </button>
+
       <motion.article
         role="dialog"
         aria-modal="true"
@@ -699,7 +735,8 @@ function Detail({
           </div>
         ) : null}
       </motion.article>
-    </motion.div>
+    </motion.div>,
+    document.body,
   )
 }
 
