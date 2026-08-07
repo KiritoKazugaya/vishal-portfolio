@@ -6,6 +6,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import { ArrowLeft, ArrowRight, ExternalLink, GitBranch, Lock } from "lucide-react"
 
 import { Chapter } from "@/components/ui/chapter"
+import { setScrollLock } from "@/hooks/use-chip-timeline"
 import { projectCategories, projects } from "@/lib/data"
 import type { Project, ProjectCategory } from "@/lib/types"
 import s from "./projects.module.css"
@@ -15,7 +16,8 @@ const AUTOPLAY_MS = 2000
 const VISIBLE_DEPTH = 3
 
 export function Projects() {
-  const [open, setOpen] = useState<Project | null>(null)
+  /** Index into `visible`, so the modal can step through without closing. */
+  const [open, setOpen] = useState<number | null>(null)
   const [filter, setFilter] = useState<ProjectCategory | null>(null)
   const [active, setActive] = useState(0)
   const [held, setHeld] = useState(false)
@@ -56,6 +58,24 @@ export function Projects() {
     },
     [active, n],
   )
+
+  /*
+   * The page freeze lives here, not in the modal.
+   *
+   * AnimatePresence keeps the dialog mounted through its exit animation, so
+   * tying the lock to the modal's own unmount makes releasing it depend on that
+   * animation completing. If it ever does not, the page stays frozen with
+   * nothing on screen to explain why. Keyed on `open`, it cannot be stranded.
+   */
+  useEffect(() => {
+    const locked = open !== null
+    setScrollLock(locked)
+    document.body.style.overflow = locked ? "hidden" : ""
+    return () => {
+      setScrollLock(false)
+      document.body.style.overflow = ""
+    }
+  }, [open])
 
   const paused = held || open !== null || !!reduced
   useEffect(() => {
@@ -160,7 +180,7 @@ export function Projects() {
                     <Card
                       project={p}
                       centre={centre}
-                      onActivate={() => (centre ? setOpen(p) : setActive(i))}
+                      onActivate={() => (centre ? setOpen(i) : setActive(i))}
                     />
                   </div>
                 )
@@ -187,7 +207,21 @@ export function Projects() {
       </div>
 
       <AnimatePresence>
-        {open ? <Detail project={open} onClose={() => setOpen(null)} /> : null}
+        {open !== null && visible[open] ? (
+          <Detail
+            project={visible[open]}
+            index={open}
+            total={n}
+            onClose={() => setOpen(null)}
+            /* Stepping in the modal also moves the arc, so closing lands the
+               reader on the project they were last reading. */
+            onStep={(dir) => {
+              const next = (open + dir + n) % n
+              setOpen(next)
+              setActive(next)
+            }}
+          />
+        ) : null}
       </AnimatePresence>
     </Chapter>
   )
@@ -412,8 +446,21 @@ function langLabel(langs: Project["languages"]) {
 
 /* -------------------------------------------------------------------------- */
 
-function Detail({ project, onClose }: { project: Project; onClose: () => void }) {
+function Detail({
+  project,
+  index,
+  total,
+  onClose,
+  onStep,
+}: {
+  project: Project
+  index: number
+  total: number
+  onClose: () => void
+  onStep: (dir: 1 | -1) => void
+}) {
   const closeRef = useRef<HTMLButtonElement>(null)
+  const scrollRef = useRef<HTMLDivElement>(null)
   const accent = `var(${project.accent})`
   const style = { "--card-accent": accent } as CSSProperties
   const hasAssumed = project.metrics.some((m) => m.assumed)
@@ -425,20 +472,25 @@ function Detail({ project, onClose }: { project: Project; onClose: () => void })
     [onClose],
   )
 
+  // The page freeze is owned by the parent, keyed on which project is open.
   useEffect(() => {
     document.addEventListener("keydown", onKey)
-    const prev = document.body.style.overflow
-    document.body.style.overflow = "hidden"
     closeRef.current?.focus()
-    return () => {
-      document.removeEventListener("keydown", onKey)
-      document.body.style.overflow = prev
-    }
+    return () => document.removeEventListener("keydown", onKey)
   }, [onKey])
+
+  // Stepping to another project starts that case study at the top.
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: 0 })
+  }, [index])
 
   return (
     <motion.div
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-void/85 p-4 backdrop-blur-sm md:p-8"
+      ref={scrollRef}
+      /* Lenis must keep its hands off this scroller, or the wheel goes to the
+         page it is supposed to be holding still. */
+      data-lenis-prevent
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto overscroll-contain bg-void/85 p-4 backdrop-blur-sm md:p-8"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -456,16 +508,43 @@ function Detail({ project, onClose }: { project: Project; onClose: () => void })
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 16, scale: 0.99 }}
         transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-        className="glass relative my-auto w-full max-w-3xl p-5 sm:p-6 md:p-10"
+        className="glass relative my-auto w-full max-w-3xl px-5 pb-5 sm:px-6 sm:pb-6 md:px-10 md:pb-10"
       >
-        <button
-          ref={closeRef}
-          type="button"
-          onClick={onClose}
-          className="absolute right-3 top-3 rounded-full border border-edge bg-carbon/70 px-3 py-1 text-xs text-mute transition-colors hover:border-gold hover:text-gold md:right-5 md:top-5"
-        >
-          Close
-        </button>
+        {/* Sticky, so stepping and closing stay reachable however far down the
+            case study the reader has scrolled. */}
+        <div className={s.bar}>
+          <span className={s.pos}>
+            {String(index + 1).padStart(2, "0")}
+            <span className={s.posOf}> / {String(total).padStart(2, "0")}</span>
+          </span>
+
+          <div className={s.barBtns}>
+            <button
+              type="button"
+              onClick={() => onStep(-1)}
+              aria-label="Previous case study"
+              className={s.barBtn}
+            >
+              <ArrowLeft className="h-4 w-4" aria-hidden />
+            </button>
+            <button
+              type="button"
+              onClick={() => onStep(1)}
+              aria-label="Next case study"
+              className={s.barBtn}
+            >
+              <ArrowRight className="h-4 w-4" aria-hidden />
+            </button>
+            <button
+              ref={closeRef}
+              type="button"
+              onClick={onClose}
+              className={s.barClose}
+            >
+              Close
+            </button>
+          </div>
+        </div>
 
         <span className="eyebrow" style={{ color: accent }}>
           {project.domain} · {project.year} · {project.category}

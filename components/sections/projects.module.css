@@ -432,6 +432,94 @@
 }
 
 /* -------------------------------------------------------------------------- */
+/*  Case-study toolbar                                                         */
+/* -------------------------------------------------------------------------- */
+
+/*
+ * Floats at the top of the case study and sticks there. A long write-up scrolls
+ * for several screens, and both stepping and closing have to stay reachable
+ * without scrolling back up to find them.
+ */
+.bar {
+  position: sticky;
+  top: 0.4rem;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-block: clamp(1rem, 2vw, 1.6rem) clamp(1rem, 1.8vw, 1.5rem);
+  padding: 0.45rem 0.5rem 0.45rem 0.95rem;
+  border: 1px solid var(--color-edge);
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--color-carbon) 90%, transparent);
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  box-shadow: 0 12px 26px -16px rgba(0, 0, 0, 0.95);
+}
+
+.pos {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  color: var(--color-chalk);
+}
+
+.posOf {
+  color: var(--color-faint);
+}
+
+.barBtns {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.barBtn {
+  display: inline-flex;
+  height: 2rem;
+  width: 2rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-edge);
+  border-radius: 999px;
+  background: none;
+  color: var(--color-mute);
+  cursor: pointer;
+  transition:
+    color 0.25s ease,
+    border-color 0.25s ease,
+    background-color 0.25s ease;
+}
+
+.barBtn:hover,
+.barBtn:focus-visible {
+  color: var(--accent-gold);
+  border-color: color-mix(in oklab, var(--accent-gold) 60%, transparent);
+  background: color-mix(in oklab, var(--accent-gold) 10%, transparent);
+}
+
+.barClose {
+  margin-left: 0.15rem;
+  padding: 0.4rem 0.85rem;
+  border: 1px solid var(--color-edge);
+  border-radius: 999px;
+  background: none;
+  font-size: 0.75rem;
+  color: var(--color-mute);
+  cursor: pointer;
+  transition:
+    color 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.barClose:hover,
+.barClose:focus-visible {
+  color: var(--color-chalk);
+  border-color: var(--color-faint);
+}
+
+/* -------------------------------------------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
   .slot,

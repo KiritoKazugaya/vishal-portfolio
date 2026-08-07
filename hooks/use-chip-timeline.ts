@@ -215,6 +215,20 @@ function applyFocus(index: number) {
   })
 }
 
+/**
+ * Freeze the page behind an overlay.
+ *
+ * `body { overflow: hidden }` alone does nothing here: Lenis reads wheel and
+ * touch events and scrolls the page programmatically, so it never consults the
+ * body's overflow. The smooth scroller has to be told to stand down, and any
+ * scrollable region inside the overlay needs `data-lenis-prevent` so Lenis
+ * leaves its wheel events alone.
+ */
+export function setScrollLock(locked: boolean) {
+  if (locked) scroller?.stop()
+  else scroller?.start()
+}
+
 /** Jump to a chapter from the navigation without desyncing the timeline. */
 export function scrollToLayer(id: LayerId) {
   const el = document.querySelector<HTMLElement>(`[data-layer="${id}"]`)
