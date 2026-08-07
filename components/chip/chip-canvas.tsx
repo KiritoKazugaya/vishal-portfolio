@@ -6,6 +6,7 @@ import Image from "next/image"
 
 import { chipState } from "@/lib/scroll-store"
 import { useCoarsePointer, useMounted, useReducedMotion } from "@/hooks/use-reduced-motion"
+import { useTheme } from "@/hooks/use-theme"
 import { ChipScene } from "./chip-scene"
 
 /**
@@ -40,6 +41,7 @@ export function ChipCanvas() {
   const reduced = useReducedMotion()
   const coarse = useCoarsePointer()
   const mounted = useMounted()
+  const light = useTheme() === "light"
 
   const dpr = useMemo<[number, number]>(() => [1, coarse ? 1.5 : 2], [coarse])
 
@@ -83,12 +85,12 @@ export function ChipCanvas() {
   }, [mounted, reduced, webgl])
 
   if (!mounted) {
-    return <div className="fixed inset-0 -z-10 bg-[#050507]" aria-hidden />
+    return <div className="fixed inset-0 -z-10 bg-void" aria-hidden />
   }
 
   if (reduced || !webgl) {
     return (
-      <div className="fixed inset-0 -z-10 flex items-center justify-center overflow-hidden bg-[#050507]">
+      <div className="fixed inset-0 -z-10 flex items-center justify-center overflow-hidden bg-void">
         <Image
           src="/assets/chip/fallback-exploded.webp"
           alt="Exploded view of a GPU package: heat spreader, silicon die, interposer, package substrate, and BGA contact array, separated along a vertical axis."
@@ -102,16 +104,16 @@ export function ChipCanvas() {
   }
 
   return (
-    <div className="fixed inset-0 -z-10 bg-[#050507]" aria-hidden>
+    <div className="fixed inset-0 -z-10 bg-void" aria-hidden>
       <Canvas
         dpr={dpr}
         gl={coarse ? GL_LITE : GL}
         camera={CAMERA}
-        onCreated={({ gl }) => gl.setClearColor("#050507")}
+        onCreated={({ gl }) => gl.setClearColor(light ? "#f4f6fa" : "#050507")}
         fallback={null}
       >
         <Suspense fallback={null}>
-          <ChipScene density={coarse ? 3 : 5} />
+          <ChipScene density={coarse ? 3 : 5} light={light} />
         </Suspense>
       </Canvas>
     </div>

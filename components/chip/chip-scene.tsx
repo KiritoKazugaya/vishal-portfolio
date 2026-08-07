@@ -120,7 +120,7 @@ function FocusLight() {
   return <pointLight ref={light} position={[2.4, 2, 3.2]} intensity={4} distance={22} decay={1.6} />
 }
 
-export function ChipScene({ density }: { density: number }) {
+export function ChipScene({ density, light }: { density: number; light: boolean }) {
   /* useTexture suspends, so by the time this renders every layer texture has
      resolved — which is exactly the moment the preloader is waiting for. */
   useEffect(() => {
@@ -130,13 +130,23 @@ export function ChipScene({ density }: { density: number }) {
 
   return (
     <>
-      <color attach="background" args={["#050507"]} />
-      <fog attach="fog" args={["#050507", 16, 34]} />
+      {/* Clears to the page colour, not to black — otherwise the canvas reads
+          as a dark rectangle sitting behind a white page. Fog matches it so the
+          far layers dissolve into the background rather than into a haze of
+          the wrong colour. */}
+      <color attach="background" args={[light ? "#f4f6fa" : "#050507"]} />
+      <fog attach="fog" args={[light ? "#f4f6fa" : "#050507", 16, 34]} />
 
       <CameraRig />
 
-      <ambientLight intensity={0.35} />
-      <directionalLight position={[4, 12, 6]} intensity={1.5} color="#dbeafe" />
+      {/* A dark package on a light ground loses its shadow separation, so the
+          fill comes up and the key comes down to keep the silhouette. */}
+      <ambientLight intensity={light ? 0.72 : 0.35} />
+      <directionalLight
+        position={[4, 12, 6]}
+        intensity={light ? 1.15 : 1.5}
+        color={light ? "#ffffff" : "#dbeafe"}
+      />
       <directionalLight position={[-6, 4, -4]} intensity={0.5} color="#7dd3fc" />
       <FocusLight />
 

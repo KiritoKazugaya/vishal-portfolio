@@ -16,6 +16,8 @@
    */
   --color-mute: #b3b7c4;
   --color-faint: #949aab;
+  /* Micro-labels sit a step above `faint` — they carry section meaning. */
+  --color-label: #a8adbc;
 
   /* One accent per chip layer. */
   --color-cyan: #7dd3fc;
@@ -47,6 +49,132 @@
   --rail-space: 0px;
 
   color-scheme: dark;
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Light theme                                                                */
+/*                                                                             */
+/*  Tailwind v4 emits `--color-*` into :root and every utility reads them       */
+/*  through var(), so overriding the tokens here re-themes `bg-void`,           */
+/*  `text-mute` and the rest without touching a single component.               */
+/*                                                                             */
+/*  The accents are deepened rather than kept at their dark-theme values. Neon   */
+/*  cyan on white is around 1.6:1 — it looks like a highlighter, not a colour.   */
+/*  These sit vivid enough to read as neon against the rims and glows while      */
+/*  still clearing contrast when they carry text.                                */
+/* -------------------------------------------------------------------------- */
+
+[data-theme="light"] {
+  color-scheme: light;
+
+  /* Surfaces. Not pure white — #fff under a full-bleed layout glares. */
+  --color-void: #f4f6fa;
+  --color-carbon: #ffffff;
+  --color-graphite: #eaedf4;
+  --color-edge: #d4d9e4;
+
+  /* Ink */
+  --color-chalk: #0b0e14;
+  --color-mute: #414857;
+  --color-faint: #5c6474;
+  --color-label: #4b5365;
+
+  --color-cyan: #0a7189;
+  --color-gold: #9a7615;
+  --color-violet: #7b3fe4;
+  --color-emerald: #0a8f63;
+  --color-amber: #c2620a;
+
+  --accent-cyan: #0a7189;
+  --accent-gold: #9a7615;
+  --accent-violet: #7b3fe4;
+  --accent-emerald: #0a8f63;
+  --accent-amber: #c2620a;
+
+  /* Engraved gold has to invert its logic on a light ground: the bright bands
+     now read as the polish and the dark bands carry the letterform, so the
+     whole ramp drops several stops or the glyphs vanish into the page. */
+  --metal-gold: linear-gradient(
+    176deg,
+    #6b5016 0%,
+    #a8842c 8%,
+    #d9bd6e 17%,
+    #8a6a1f 31%,
+    #5c4512 47%,
+    #c2a047 63%,
+    #7d5f22 79%,
+    #4d3b11 100%
+  );
+  --metal-sheen: linear-gradient(
+    100deg,
+    transparent 38%,
+    rgba(255, 255, 255, 0.5) 50%,
+    transparent 62%
+  );
+}
+
+/* Frosted white rather than tinted black. */
+[data-theme="light"] .glass {
+  background:
+    linear-gradient(
+      158deg,
+      rgba(255, 255, 255, 0.94) 0%,
+      rgba(255, 255, 255, 0.62) 42%,
+      rgba(255, 255, 255, 0.88) 100%
+    ),
+    rgba(255, 255, 255, 0.72);
+  border-color: rgba(11, 14, 20, 0.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    inset 0 -1px 0 rgba(11, 14, 20, 0.06),
+    0 20px 44px -26px rgba(11, 14, 20, 0.4);
+}
+
+/* The rim IS the neon here — on white it wants more presence, not less. */
+[data-theme="light"] .glass::after {
+  opacity: 0.95;
+}
+
+[data-theme="light"] .glass-lift:hover,
+[data-theme="light"] .glass-lift:focus-visible {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    0 30px 56px -26px rgba(11, 14, 20, 0.45),
+    0 0 0 1px color-mix(in oklab, var(--card-accent, var(--accent-cyan)) 45%, transparent);
+}
+
+[data-theme="light"] .chapter-scrim::before {
+  background: radial-gradient(
+    72% 60% at 50% 50%,
+    rgba(244, 246, 250, 0.96) 0%,
+    rgba(244, 246, 250, 0.9) 44%,
+    rgba(244, 246, 250, 0.5) 74%,
+    rgba(244, 246, 250, 0) 100%
+  );
+}
+
+[data-theme="light"] .spark-frame {
+  background: rgba(255, 255, 255, 0.86);
+  border-color: rgba(11, 14, 20, 0.1);
+}
+
+[data-theme="light"] .spark-frame::after {
+  background: rgba(255, 255, 255, 0.95);
+}
+
+/*
+ * The terminal stays dark in both themes, deliberately. A console rendered as
+ * white paper stops reading as a console; keeping code surfaces dark on a light
+ * page is the same convention every docs site uses for code blocks.
+ */
+[data-theme="light"] .terminal {
+  border-color: rgba(11, 14, 20, 0.16);
+  box-shadow: 0 20px 44px -26px rgba(11, 14, 20, 0.5);
+}
+
+[data-theme="light"] ::selection {
+  background: color-mix(in oklab, var(--accent-violet) 24%, transparent);
+  color: #000;
 }
 
 /*
@@ -346,7 +474,9 @@ body {
   font-weight: 500;
   letter-spacing: 0.17em;
   text-transform: uppercase;
-  color: #a8adbc;
+  /* Tokenised, not a literal: it was hardcoded when the dark-theme contrast was
+     raised, which left it at 2.07:1 on a light ground. */
+  color: var(--color-label);
 }
 
 .h-chapter {

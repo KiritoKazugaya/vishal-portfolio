@@ -41,7 +41,7 @@ function Card({ item, side }: { item: ExperienceItem; side: Side }) {
       className={s.card}
       data-flipped={flipped}
       data-side={side}
-      style={{ "--card-accent": item.accent } as CSSProperties}
+      style={{ "--card-accent": `var(${item.accent})` } as CSSProperties}
     >
       <div className={s.inner}>
         {/* --------------------------------------------------------- front */}

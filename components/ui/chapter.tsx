@@ -20,7 +20,7 @@ interface Props {
  */
 export function Chapter({ id, title, lead, children, bare = false }: Props) {
   const def = LAYERS[layerIndex(id)]
-  const style = { "--card-accent": def.accent } as CSSProperties
+  const style = { "--card-accent": `var(${def.cssAccent})` } as CSSProperties
 
   return (
     <section

@@ -6,6 +6,7 @@ import { LAYERS } from "@/lib/chip-config"
 import { contact, navItems, profile } from "@/lib/data"
 import { scrollToLayer } from "@/hooks/use-chip-timeline"
 import { useActiveLayer, useHeroDone } from "@/hooks/use-active-layer"
+import { ThemeToggle } from "./theme-toggle"
 import s from "./nav.module.css"
 
 /**
@@ -50,7 +51,7 @@ export function Nav() {
                   data-active={isActive}
                   aria-current={isActive ? "true" : undefined}
                   className={s.topItem}
-                  style={{ "--pin": LAYERS[index].accent } as CSSProperties}
+                  style={{ "--pin": `var(${LAYERS[index].cssAccent})` } as CSSProperties}
                 >
                   {item.label}
                   <span className={s.topRule} aria-hidden />
@@ -60,13 +61,18 @@ export function Nav() {
           })}
         </ul>
 
-        <a
-          href={contact.resume}
-          download
-          className="rounded-full border border-edge px-4 py-2 text-xs font-medium text-chalk transition-colors hover:border-cyan hover:text-cyan"
-        >
-          Résumé
-        </a>
+        {/* Résumé sits inboard of the toggle: the toggle is chrome and belongs
+            at the very edge, the résumé is content. */}
+        <div className="flex shrink-0 items-center gap-2.5">
+          <a
+            href={contact.resume}
+            download
+            className="rounded-full border border-edge px-4 py-2 text-xs font-medium text-chalk transition-colors hover:border-cyan hover:text-cyan"
+          >
+            Résumé
+          </a>
+          <ThemeToggle />
+        </div>
       </nav>
     </header>
   )
@@ -92,7 +98,7 @@ export function LayerRail() {
           {
             "--i": active,
             "--n": LAYERS.length,
-            "--lit": LAYERS[active]?.accent ?? LAYERS[0].accent,
+            "--lit": `var(${LAYERS[active]?.cssAccent ?? LAYERS[0].cssAccent})`,
           } as CSSProperties
         }
       >
@@ -112,7 +118,7 @@ export function LayerRail() {
                 data-active={isActive}
                 aria-current={isActive ? "true" : undefined}
                 className={s.item}
-                style={{ "--pin": layer.accent } as CSSProperties}
+                style={{ "--pin": `var(${layer.cssAccent})` } as CSSProperties}
               >
                 <span className={s.padWrap} aria-hidden>
                   <span className={s.pad} />

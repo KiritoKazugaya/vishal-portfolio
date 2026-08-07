@@ -61,15 +61,18 @@ export function CircuitField({ enabled }: { enabled: boolean }) {
       aria-hidden
     >
       <defs>
+        {/* Stops read the theme tokens rather than fixed hex, so the board
+            re-inks itself with the rest of the page — neon cyan at 55% is
+            invisible on white. */}
         <linearGradient id="trace-fade" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#7dd3fc" stopOpacity="0" />
-          <stop offset="45%" stopColor="#7dd3fc" stopOpacity="0.55" />
-          <stop offset="100%" stopColor="#c7a24a" stopOpacity="0.15" />
+          <stop offset="0%" stopColor="var(--accent-cyan)" stopOpacity="0" />
+          <stop offset="45%" stopColor="var(--accent-cyan)" stopOpacity="0.55" />
+          <stop offset="100%" stopColor="var(--accent-gold)" stopOpacity="0.15" />
         </linearGradient>
         <linearGradient id="trace-fade-r" x1="1" y1="0" x2="0" y2="0">
-          <stop offset="0%" stopColor="#a78bfa" stopOpacity="0" />
-          <stop offset="45%" stopColor="#a78bfa" stopOpacity="0.5" />
-          <stop offset="100%" stopColor="#7dd3fc" stopOpacity="0.15" />
+          <stop offset="0%" stopColor="var(--accent-violet)" stopOpacity="0" />
+          <stop offset="45%" stopColor="var(--accent-violet)" stopOpacity="0.5" />
+          <stop offset="100%" stopColor="var(--accent-cyan)" stopOpacity="0.15" />
         </linearGradient>
       </defs>
 
@@ -83,7 +86,7 @@ export function CircuitField({ enabled }: { enabled: boolean }) {
       </g>
 
       {/* Vias — the small pads where a trace changes layer. */}
-      <g fill="#7dd3fc" opacity="0.35">
+      <g fill="var(--accent-cyan)" opacity="0.35">
         {VIAS.map(([cx, cy], i) => (
           <circle key={i} cx={cx} cy={cy} r="2.4" />
         ))}

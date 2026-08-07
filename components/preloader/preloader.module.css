@@ -50,6 +50,37 @@
   transition: opacity 0.5s ease 0.35s;
 }
 
+/* Must clear to the page colour, or the hand-off flashes black behind the
+   chip on its way to a white hero. */
+[data-theme="light"] .backdrop {
+  background: radial-gradient(120% 90% at 50% 45%, #ffffff 0%, #f4f6fa 55%, #e9edf4 100%);
+}
+
+[data-theme="light"] .trace {
+  stroke: rgba(14, 143, 176, 0.28);
+}
+
+[data-theme="light"] .trace[data-gold="true"] {
+  stroke: rgba(154, 118, 21, 0.3);
+}
+
+[data-theme="light"] .pulse {
+  stroke: #0e8fb0;
+  filter: drop-shadow(0 0 6px rgba(14, 143, 176, 0.55));
+}
+
+[data-theme="light"] .pulse[data-gold="true"] {
+  stroke: #9a7615;
+  filter: drop-shadow(0 0 6px rgba(154, 118, 21, 0.5));
+}
+
+/* The emissive lift the hero adds is far less visible against a light ground,
+   so the plate needs almost none of it to match. */
+[data-theme="light"] .chip {
+  --plate-brightness: 1;
+  --plate-glow: 0.06;
+}
+
 .root[data-done="true"] .backdrop {
   opacity: 0;
 }

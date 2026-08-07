@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next"
 import { Inter, JetBrains_Mono } from "next/font/google"
 
 import { profile } from "@/lib/data"
+import { THEME_SCRIPT } from "@/lib/theme"
 import "./globals.css"
 
 const inter = Inter({
@@ -55,7 +56,15 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${mono.variable}`}>
+    <html lang="en" data-theme="dark" className={`${inter.variable} ${mono.variable}`}>
+      <head>
+        {/*
+          Resolves the theme before the first paint. It has to be inline and
+          synchronous — a bundled module would run a frame late and the page
+          would flash the wrong theme on every load.
+        */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
       <body className="antialiased">
         <a
           href="#main"

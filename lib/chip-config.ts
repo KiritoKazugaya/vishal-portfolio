@@ -18,8 +18,18 @@ export interface LayerDef {
   thickness: number
   /** Resting Y offset once the stack is fully separated. */
   separatedY: number
-  /** Accent colour used for this layer's energy and focus lighting. */
+  /**
+   * Literal hex for the 3D scene — three.js materials cannot read CSS vars.
+   * Only ever used inside the canvas, where the ground is the dark package in
+   * both themes.
+   */
   accent: string
+  /**
+   * The same accent as a token reference, for anything in the DOM. This is what
+   * lets a nav item or a chapter rim re-ink with the theme; the raw hex above
+   * would stay neon-on-white and drop to about 1.5:1.
+   */
+  cssAccent: string
   /** Emissive tint of the slab itself when active. */
   emissive: string
 }
@@ -39,6 +49,7 @@ export const LAYERS: LayerDef[] = [
     thickness: 0.17,
     separatedY: 4.6,
     accent: "#7dd3fc",
+    cssAccent: "--accent-cyan",
     emissive: "#0e3b52",
   },
   {
@@ -49,6 +60,7 @@ export const LAYERS: LayerDef[] = [
     thickness: 0.1,
     separatedY: 1.8,
     accent: "#c7a24a",
+    cssAccent: "--accent-gold",
     emissive: "#4a3a12",
   },
   {
@@ -59,6 +71,7 @@ export const LAYERS: LayerDef[] = [
     thickness: 0.12,
     separatedY: -1.2,
     accent: "#a78bfa",
+    cssAccent: "--accent-violet",
     emissive: "#2b1f52",
   },
   {
@@ -69,6 +82,7 @@ export const LAYERS: LayerDef[] = [
     thickness: 0.14,
     separatedY: -4.0,
     accent: "#34d399",
+    cssAccent: "--accent-emerald",
     emissive: "#0d3d2c",
   },
   {
@@ -79,6 +93,7 @@ export const LAYERS: LayerDef[] = [
     thickness: 0.16,
     separatedY: -6.7,
     accent: "#f0b429",
+    cssAccent: "--accent-amber",
     emissive: "#4a3208",
   },
 ]

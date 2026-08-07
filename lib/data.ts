@@ -759,7 +759,7 @@ export const experience: ExperienceItem[] = [
       "Automated deployment with MLflow, Docker, and GitHub Actions, and monitored prediction quality, feature drift, and model health in production.",
     ],
     tags: ["RAG", "LangChain", "PyTorch", "Databricks", "MLOps"],
-    accent: "#7dd3fc",
+    accent: "--accent-cyan",
     stats: [
       { label: "Records / month", value: 15, suffix: "M+" },
       { label: "Years in role", value: 1.4 },
@@ -789,7 +789,7 @@ export const experience: ExperienceItem[] = [
       "Automated data preparation and training workflows with Python and Apache Airflow, and migrated ML workloads to AWS and Azure.",
     ],
     tags: ["Python", "NLP", "Airflow", "AWS", "Azure", "Tableau"],
-    accent: "#34d399",
+    accent: "--accent-emerald",
     stats: [
       { label: "Years in role", value: 3.9 },
       { label: "Rows in EDA", value: 10, suffix: "M+" },
@@ -815,7 +815,7 @@ export const experience: ExperienceItem[] = [
       "Capstone data-science work on GitHub repository growth using self-collected data at scale.",
     ],
     tags: ["Information Systems", "Analytics", "Operations"],
-    accent: "#a78bfa",
+    accent: "--accent-violet",
     stats: [
       { label: "Graduated", value: 2025 },
       { label: "Repos in capstone scope", value: 300, suffix: "M" },
@@ -840,7 +840,7 @@ export const experience: ExperienceItem[] = [
       "Started working in machine learning before graduating.",
     ],
     tags: ["Engineering", "Signals", "Mathematics"],
-    accent: "#f0b429",
+    accent: "--accent-amber",
     stats: [
       { label: "Graduated", value: 2021 },
       { label: "Years overlapping work", value: 1.4 },
