@@ -29,7 +29,10 @@ const MIN_MS = 1400
  * supposed to be protecting.
  */
 const MAX_MS = 6000
-const EXIT_MS = 900
+/* Covers the staged exit: settle 0.75s, then a 0.9s dissolve starting at 0.75s.
+   Only the first ~0.85s of this is a wait — the page is revealed and usable
+   underneath while the plate finishes fading. */
+const EXIT_MS = 1750
 
 const C = 500
 const HALF = 180
@@ -71,16 +74,18 @@ export function Preloader() {
     sceneReadyRef.current = sceneReady
   }, [sceneReady])
 
-  // Hold the page still while the sequence runs.
+  /* Held only while the sequence is actually running. Released the moment the
+     hand-off starts, so the page is scrollable during the dissolve rather than
+     locked behind a plate that is already 90% transparent. */
   useEffect(() => {
-    if (gone) return
+    if (done) return
     const prev = document.body.style.overflow
     document.body.style.overflow = "hidden"
     window.scrollTo(0, 0)
     return () => {
       document.body.style.overflow = prev
     }
-  }, [gone])
+  }, [done])
 
   /*
    * setInterval, not requestAnimationFrame. A counter does not need 60fps, and
@@ -126,6 +131,9 @@ export function Preloader() {
       aria-live="polite"
       aria-label={done ? "Loaded" : `Loading, ${pct} percent`}
     >
+      {/* Its own layer so it can clear before the plate does. */}
+      <div className={s.backdrop} aria-hidden />
+
       <div className={s.stage}>
         <svg className={s.board} viewBox="0 0 1000 1000" aria-hidden focusable="false">
           {[0, 90, 180, 270].map((rot) => (

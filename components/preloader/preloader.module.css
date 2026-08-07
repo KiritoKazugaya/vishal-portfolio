@@ -4,6 +4,22 @@
  * occupies so the two read as one object.
  */
 
+/*
+ * The exit is staged rather than a single fade of the whole overlay, which
+ * read as the loader being swapped out for the page.
+ *
+ *   0.00-0.75s  the plate scales to the hero chip's exact size
+ *   0.35-0.85s  the backdrop clears, revealing the live hero behind it while
+ *               the plate is still fully opaque and now perfectly aligned
+ *   0.75-1.65s  the plate dissolves into the WebGL chip underneath it
+ *
+ * Because both chips are the same size in the same place, the middle window is
+ * the whole trick: for half a second there are two chips exactly on top of one
+ * another, so what fades is a duplicate rather than a replacement.
+ *
+ * Perceived loading ends at 0.85s when the backdrop goes, not at unmount — the
+ * page is interactive underneath while the plate is still dissolving.
+ */
 .root {
   position: fixed;
   inset: 0;
@@ -13,17 +29,25 @@
   align-items: center;
   justify-content: center;
   gap: clamp(1.25rem, 3vh, 2.5rem);
-  background: radial-gradient(120% 90% at 50% 45%, #0a0a12 0%, #050507 55%, #030304 100%);
-  opacity: 1;
-  transition:
-    opacity 0.55s ease 0.28s,
-    visibility 0s linear 0.83s;
+  transition: visibility 0s linear 1.7s;
 }
 
 .root[data-done="true"] {
-  opacity: 0;
   visibility: hidden;
+  /* Released immediately, so the page is usable while the plate dissolves. */
   pointer-events: none;
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(120% 90% at 50% 45%, #0a0a12 0%, #050507 55%, #030304 100%);
+  transition: opacity 0.5s ease 0.35s;
+}
+
+.root[data-done="true"] .backdrop {
+  opacity: 0;
 }
 
 /* ------------------------------------------------------------------ stage */
@@ -116,7 +140,11 @@
   position: relative;
   width: min(30vh, 72vw);
   aspect-ratio: 1;
-  transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+  /* Fades only after it has finished settling, so the dissolve happens with
+     the two chips already registered on top of one another. */
+  transition:
+    transform 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.9s ease 0.75s;
 }
 
 /*
@@ -133,6 +161,7 @@
  */
 .root[data-done="true"] .chip {
   transform: scale(1.537);
+  opacity: 0;
 }
 
 .chipImg {
@@ -253,11 +282,16 @@
     stroke-dasharray: none;
     stroke-dashoffset: 0;
   }
-  .root,
+  /* No staged dissolve for reduced motion — just clear it. */
+  .root {
+    transition: visibility 0s linear 0.25s;
+  }
+  .backdrop,
   .board,
   .chip,
   .readout,
   .railFill {
     transition-duration: 0.2s;
+    transition-delay: 0s;
   }
 }
