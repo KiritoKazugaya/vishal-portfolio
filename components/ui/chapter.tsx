@@ -32,16 +32,9 @@ export function Chapter({ id, title, lead, children, bare = false }: Props) {
     >
       <div className="shell">
         <div className={bare ? "" : "chapter-scrim"}>
+          {/* No eyebrow: it repeated the heading directly beneath it, so every
+              chapter opened with the same word twice. */}
           <div data-reveal className="mb-10 md:mb-14">
-            <div className="mb-4 flex items-center gap-3">
-              <span
-                className="h-px w-10 shrink-0"
-                style={{ background: def.accent }}
-                aria-hidden
-              />
-              <span className="eyebrow">{def.label}</span>
-            </div>
-
             <h2 id={`${id}-heading`} className="h-chapter inlay">
               {title}
             </h2>
