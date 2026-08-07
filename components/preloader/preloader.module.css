@@ -11,7 +11,7 @@
  *   0.00-0.75s  the plate scales to the hero chip's exact size
  *   0.35-0.85s  the backdrop clears, revealing the live hero behind it while
  *               the plate is still fully opaque and now perfectly aligned
- *   0.75-1.65s  the plate dissolves into the WebGL chip underneath it
+ *   0.75-2.55s  the plate dissolves into the WebGL chip underneath it
  *
  * Because both chips are the same size in the same place, the middle window is
  * the whole trick: for half a second there are two chips exactly on top of one
@@ -20,16 +20,20 @@
  * Perceived loading ends at 0.85s when the backdrop goes, not at unmount — the
  * page is interactive underneath while the plate is still dissolving.
  */
+/*
+ * Deliberately NOT a centred flex column.
+ *
+ * With the stage and the readout as flex children of a centred column, the two
+ * are centred *together* — which pushed the chip above the viewport midpoint by
+ * roughly half the readout's height. The hero chip is centred on the viewport
+ * itself, so the plate landed high and the two only partly covered each other.
+ * Both are now positioned against the viewport independently.
+ */
 .root {
   position: fixed;
   inset: 0;
   z-index: 200;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: clamp(1.25rem, 3vh, 2.5rem);
-  transition: visibility 0s linear 1.7s;
+  transition: visibility 0s linear 2.6s;
 }
 
 .root[data-done="true"] {
@@ -52,8 +56,12 @@
 
 /* ------------------------------------------------------------------ stage */
 
+/* Centred on the viewport, which is where the hero chip is. */
 .stage {
-  position: relative;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   display: grid;
   place-items: center;
   width: min(86vw, 62vh);
@@ -141,10 +149,12 @@
   width: min(30vh, 72vw);
   aspect-ratio: 1;
   /* Fades only after it has finished settling, so the dissolve happens with
-     the two chips already registered on top of one another. */
+     the two chips already registered on top of one another. Long and gentle —
+     the page underneath is live and interactive throughout, so the duration
+     costs the reader nothing. */
   transition:
     transform 0.75s cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 0.9s ease 0.75s;
+    opacity 1.8s ease 0.75s;
 }
 
 /*
@@ -199,7 +209,13 @@
 
 /* ---------------------------------------------------------------- readout */
 
+/* Sits below the plate rather than sharing a centring box with it: the chip is
+   30vh tall, so its lower edge is 15vh below centre. */
 .readout {
+  position: absolute;
+  left: 50%;
+  top: calc(50% + 19vh);
+  transform: translateX(-50%);
   display: flex;
   width: min(86vw, 22rem);
   flex-direction: column;

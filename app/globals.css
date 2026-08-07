@@ -49,6 +49,16 @@
   color-scheme: dark;
 }
 
+/*
+ * Reserve the scrollbar gutter permanently. Locking the page — the preloader
+ * hand-off, an open case study — removes the scrollbar, and without a reserved
+ * gutter every fixed element jumps a few pixels sideways when it is taken away
+ * and again when it comes back.
+ */
+html {
+  scrollbar-gutter: stable;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

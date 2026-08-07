@@ -29,10 +29,10 @@ const MIN_MS = 1400
  * supposed to be protecting.
  */
 const MAX_MS = 6000
-/* Covers the staged exit: settle 0.75s, then a 0.9s dissolve starting at 0.75s.
+/* Covers the staged exit: settle 0.75s, then a 1.8s dissolve starting at 0.75s.
    Only the first ~0.85s of this is a wait — the page is revealed and usable
    underneath while the plate finishes fading. */
-const EXIT_MS = 1750
+const EXIT_MS = 2650
 
 const C = 500
 const HALF = 180
