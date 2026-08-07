@@ -355,6 +355,11 @@
   border: 1px solid var(--color-edge);
   border-radius: 999px;
   background: color-mix(in oklab, var(--color-graphite) 60%, transparent);
+  /* It now sits over the WebGL stage for the whole hero act with no bar behind
+     it, so the 60% surface has to do the separating on its own. Same blur as
+     the trigger it is paired with. */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   cursor: pointer;
 }
 
@@ -462,34 +467,61 @@
 /*
  * The control cluster is fixed and is NOT inside <header>.
  *
- * That is the point of it. <header> is inert for the whole 400vh hero act, and
- * inert cannot be escaped from the inside — so anything that should be reachable
- * during the hero has to live outside it. z-45 clears the bar's 40 and stays
- * under the preloader's 200.
+ * That is the point of it. <header> is inert AND opacity:0 for the whole 400vh
+ * hero act, and inert cannot be escaped from the inside — so anything that has
+ * to be reachable on the screen the site opens with has to live outside it.
+ * That is why the theme toggle sits here at EVERY width rather than only on
+ * phones: while it was in the bar it did not exist until the hero was over.
+ *
+ * z-45 clears the bar's 40 and stays under the preloader's 200.
+ *
+ * The cluster is a full-height strip rather than a box at an offset, so its
+ * contents centre on the bar row by flexbox instead of by arithmetic that would
+ * need re-deriving every time a control changes size. --lane is the paired
+ * constant: it is the row's height too, which is what lines the toggle up with
+ * the résumé button sitting inside the row beside it.
  */
 .cluster {
+  --lane: 4.25rem;
+
   position: fixed;
-  top: 0.75rem;
+  top: 0;
   right: var(--gutter);
+  height: var(--lane);
   z-index: 45;
   display: flex;
   align-items: center;
   gap: 0.75rem;
 }
 
-/* Paired arithmetic: a 2.75rem control at top 0.75rem centres on a 4.25rem row
-   because (4.25 - 2.75) / 2 = 0.75. Change one of these three and change all. */
 .topRow {
   min-height: 4.25rem;
 }
 
 @media (min-width: 48rem) {
   .cluster {
-    display: none;
+    --lane: 4.75rem;
   }
 
   .topRow {
-    min-height: 0;
+    min-height: 4.75rem;
+    /*
+     * Hold the row's own contents out of the fixed cluster's lane, or the
+     * résumé button and the cluster both claim the right edge and overlap.
+     *
+     * The reserve has to track what the cluster is actually carrying, and that
+     * changes at 64rem when the trigger retires:
+     *   here  — trigger 2.75 + gap 0.75 + toggle 4.15 + gap 0.75 = 8.4rem
+     *   below — toggle 4.15 + gap 0.75 = 4.9rem
+     * Rounded up in both cases for air.
+     */
+    padding-right: 8.5rem;
+  }
+}
+
+@media (min-width: 64rem) {
+  .topRow {
+    padding-right: 5rem;
   }
 }
 
@@ -519,6 +551,18 @@
   transition:
     border-color 0.4s ease,
     box-shadow 0.4s ease;
+}
+
+/* The sheet — and so the control that opens it — retires exactly where the
+   chapter rail takes over, at 1024px. The cluster around it stays at every
+   width, because it carries the theme toggle.
+   Deliberately placed AFTER .trigger rather than up with the other breakpoint
+   rules: both selectors are (0,1,0), so source order is the only tiebreak and
+   an earlier `display: none` would simply lose to the `display: grid` above. */
+@media (min-width: 64rem) {
+  .trigger {
+    display: none;
+  }
 }
 
 .glyph {

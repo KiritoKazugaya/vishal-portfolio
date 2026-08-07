@@ -178,7 +178,7 @@ export function Nav() {
    */
   useEffect(() => {
     if (!open) return
-    const m = window.matchMedia("(min-width: 48rem)")
+    const m = window.matchMedia("(min-width: 64rem)")
     const sync = () => {
       if (m.matches) setOpen(false)
     }
@@ -223,7 +223,23 @@ export function Nav() {
             <span className="text-faint">.AKKALA</span>
           </a>
 
-          <ul className="hidden items-center gap-1 md:flex">
+          {/*
+            xl, not md. At 768px this row needed 720px of a 697px shell even
+            before the toggle claimed a lane, and the résumé button was pushed
+            out past the content edge as a result.
+
+            1024 does not fix it either, and for a non-obvious reason: that is
+            exactly where .page-inset starts reserving --rail-space (14rem) for
+            the chapter rail, so the shell loses 224px at the same instant these
+            links appear. 1280 is the first width where the wordmark, five
+            links, the résumé button and the toggle's lane all fit beside the
+            rail.
+
+            Nothing is lost between 1024 and 1280: the rail is on screen there
+            and lists the same five chapters with the same active state. Below
+            1024 the sheet covers it.
+          */}
+          <ul className="hidden items-center gap-1 xl:flex">
             {navItems.map((item) => {
               const index = LAYERS.findIndex((l) => l.id === item.layer)
               const isActive = index === active
@@ -245,11 +261,13 @@ export function Nav() {
             })}
           </ul>
 
-          {/* Résumé sits inboard of the toggle: the toggle is chrome and belongs
-              at the very edge, the résumé is content. Below md both move out to
-              the fixed cluster — the résumé into the sheet, the toggle beside
-              the trigger — because there is only 5px of slack in this row at
-              320px, and because this element is inert for the whole hero act. */}
+          {/* Résumé only. The toggle used to sit at the edge of this row, which
+              meant it did not exist until the hero act ended — this element is
+              inert and transparent for all 400vh of it, so there was no way to
+              change theme on the screen the site opens with. It now lives in
+              the fixed cluster below at every width. Below md the résumé moves
+              into the sheet as well; there is 5px of slack in this row at
+              320px. */}
           <div className="hidden shrink-0 items-center gap-2.5 md:flex">
             <a
               href={contact.resume}
@@ -258,12 +276,13 @@ export function Nav() {
             >
               Résumé
             </a>
-            <ThemeToggle />
           </div>
         </nav>
       </header>
 
-      {/* Outside <header> on purpose — see the note on Nav above. */}
+      {/* Outside <header> on purpose — see the note on Nav above. This is the
+          one place the theme toggle lives, at every width: the only spot on the
+          page that is neither inert nor hidden during the hero. */}
       <div className={s.cluster}>
         <button
           type="button"
