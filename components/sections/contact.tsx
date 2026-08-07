@@ -237,6 +237,18 @@ export function Contact() {
             <span>ET</span>
           </p>
 
+          {/*
+            The embed ships its own footer bar — "Report a problem", "Make a
+            Donation", "Website and API terms" — which is chrome, not content,
+            and cannot be styled from out here because the iframe is
+            cross-origin. So the iframe is grown past the bottom of its frame
+            and the frame clips it.
+
+            The attribution in that bar is NOT optional: OSM data is ODbL, which
+            requires visible credit. It is reinstated below in our own type, the
+            same way Leaflet renders its own attribution control rather than
+            relying on the tile server's.
+          */}
           <div
             className={`${s.mapFrame} relative mt-4 min-h-[clamp(190px,24vh,240px)] flex-1 overflow-hidden rounded-xl border border-white/10`}
           >
@@ -245,19 +257,37 @@ export function Contact() {
               src={MAP_SRC}
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
-              className={`${s.map} absolute inset-0 h-full w-full border-0`}
+              /* 3rem, not the bar's ~20px single-line height: on a narrow card
+                 that bar wraps to two lines, and a half-cropped footer looks
+                 worse than no crop at all. */
+              className={`${s.map} absolute inset-x-0 top-0 h-[calc(100%+3rem)] w-full border-0`}
             />
           </div>
 
-          <a
-            href={MAP_LINK}
-            target="_blank"
-            rel="noreferrer noopener"
-            className="mt-3 inline-flex items-center gap-1.5 self-start text-xs text-mute transition-colors hover:text-amber"
-          >
-            Open {PLACE} in OpenStreetMap
-            <ExternalLink aria-hidden className="h-3 w-3 shrink-0" />
-          </a>
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5">
+            <a
+              href={MAP_LINK}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="inline-flex items-center gap-1.5 text-xs text-mute transition-colors hover:text-amber"
+            >
+              Open {PLACE} in OpenStreetMap
+              <ExternalLink aria-hidden className="h-3 w-3 shrink-0" />
+            </a>
+
+            <p className="text-[0.66rem] text-faint">
+              ©{" "}
+              <a
+                href="https://www.openstreetmap.org/copyright"
+                target="_blank"
+                rel="noreferrer noopener"
+                className="underline decoration-dotted underline-offset-2 transition-colors hover:text-amber"
+              >
+                OpenStreetMap
+              </a>{" "}
+              contributors
+            </p>
+          </div>
         </div>
       </div>
 
