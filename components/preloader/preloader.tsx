@@ -29,29 +29,38 @@ const MIN_MS = 1400
  * supposed to be protecting.
  */
 const MAX_MS = 6000
-/* Covers the staged exit: settle 0.75s, then a 1.8s dissolve starting at 0.75s.
+/* Covers the staged exit: settle 0.75s, then a 2s dissolve starting at 0.75s.
    Only the first ~0.85s of this is a wait — the page is revealed and usable
    underneath while the plate finishes fading. */
-const EXIT_MS = 2650
+const EXIT_MS = 2850
 
 const C = 500
-const HALF = 180
+/** Traces begin under the plate, so they read as leaving the package itself. */
+const START = 58
 
-/** Eight traces off one edge, mirrored to four sides for a radiating board. */
+/*
+ * Fourteen lanes off one edge, mirrored to four sides. The board is drawn over
+ * the whole viewport rather than boxed around the chip, so the surge crosses
+ * the page instead of stopping at the plate — the fan is wide enough and the
+ * runs long enough that the traces leave the frame on every side.
+ */
+const OFFSETS = [-172, -142, -114, -88, -64, -42, -20, 20, 42, 64, 88, 114, 142, 172]
+
 function buildTraces() {
-  const offsets = [-152, -112, -72, -26, 26, 72, 112, 152]
-  return offsets.map((o, i) => {
-    const spread = o * 2.35
-    const elbow = C - HALF - 55 - Math.abs(spread - o) * 0.55
+  return OFFSETS.map((o, i) => {
+    const spread = o * 2.8
+    const bend = C - START - 86 - Math.abs(o) * 0.72
+    const diag = Math.abs(spread - o)
     return {
       d: [
-        `M ${C + o} ${C - HALF}`,
-        `L ${C + o} ${C - HALF - 55}`,
-        `L ${C + spread} ${elbow}`,
-        `L ${C + spread} -60`,
+        `M ${C + o} ${C - START}`,
+        `L ${C + o} ${bend}`,
+        `L ${C + spread} ${bend - diag}`,
+        `L ${C + spread} -620`,
       ].join(" "),
-      gold: i === 1 || i === 6,
-      delay: (Math.abs(o) / 152) * 0.22,
+      via: { x: C + o, y: bend },
+      gold: i % 4 === 1,
+      delay: (Math.abs(o) / 172) * 0.3,
     }
   })
 }
@@ -134,26 +143,37 @@ export function Preloader() {
       {/* Its own layer so it can clear before the plate does. */}
       <div className={s.backdrop} aria-hidden />
 
-      <div className={s.stage}>
-        <svg className={s.board} viewBox="0 0 1000 1000" aria-hidden focusable="false">
-          {[0, 90, 180, 270].map((rot) => (
-            <g key={rot} transform={`rotate(${rot} ${C} ${C})`}>
-              {TRACES.map((t, i) => (
-                <path key={`b${i}`} d={t.d} className={s.trace} data-gold={t.gold} />
-              ))}
-              {TRACES.map((t, i) => (
-                <path
-                  key={`p${i}`}
-                  d={t.d}
-                  className={s.pulse}
-                  data-gold={t.gold}
-                  style={{ animationDelay: `${t.delay + rot / 900}s` }}
-                />
-              ))}
-            </g>
-          ))}
-        </svg>
+      {/* Page-wide, so the surge crosses the whole viewport. `slice` keeps the
+          angles true and lets the runs leave the frame on every side. */}
+      <svg
+        className={s.board}
+        viewBox="0 0 1000 1000"
+        preserveAspectRatio="xMidYMid slice"
+        aria-hidden
+        focusable="false"
+      >
+        {[0, 90, 180, 270].map((rot) => (
+          <g key={rot} transform={`rotate(${rot} ${C} ${C})`}>
+            {TRACES.map((t, i) => (
+              <path key={`b${i}`} d={t.d} className={s.trace} data-gold={t.gold} />
+            ))}
+            {TRACES.map((t, i) => (
+              <circle key={`v${i}`} cx={t.via.x} cy={t.via.y} r="3.4" className={s.via} />
+            ))}
+            {TRACES.map((t, i) => (
+              <path
+                key={`p${i}`}
+                d={t.d}
+                className={s.pulse}
+                data-gold={t.gold}
+                style={{ animationDelay: `${t.delay + rot / 900}s` }}
+              />
+            ))}
+          </g>
+        ))}
+      </svg>
 
+      <div className={s.stage}>
         <div className={s.chip}>
           <Image
             src="/assets/chip/layer-top.webp"
@@ -163,11 +183,13 @@ export function Preloader() {
             priority
             className={s.chipImg}
           />
+          <span className={s.chipGlow} aria-hidden />
           <span className={s.core} aria-hidden />
         </div>
       </div>
 
       <div className={s.readout}>
+        <p className={s.caption}>{done ? "Power good" : "Powering page"}</p>
         <p className={s.pct}>
           <span className={s.pctNum}>{String(pct).padStart(3, "0")}</span>
           <span className={s.pctSign}>%</span>
@@ -175,7 +197,6 @@ export function Preloader() {
         <div className={s.rail} aria-hidden>
           <span className={s.railFill} style={{ transform: `scaleX(${pct / 100})` }} />
         </div>
-        <p className={s.caption}>{done ? "Power good" : "Energising package"}</p>
       </div>
     </div>
   )

@@ -11,7 +11,7 @@
  *   0.00-0.75s  the plate scales to the hero chip's exact size
  *   0.35-0.85s  the backdrop clears, revealing the live hero behind it while
  *               the plate is still fully opaque and now perfectly aligned
- *   0.75-2.55s  the plate dissolves into the WebGL chip underneath it
+ *   0.75-2.75s  the plate dissolves into the WebGL chip underneath it
  *
  * Because both chips are the same size in the same place, the middle window is
  * the whole trick: for half a second there are two chips exactly on top of one
@@ -33,7 +33,7 @@
   position: fixed;
   inset: 0;
   z-index: 200;
-  transition: visibility 0s linear 2.6s;
+  transition: visibility 0s linear 2.8s;
 }
 
 .root[data-done="true"] {
@@ -68,14 +68,14 @@
   aspect-ratio: 1;
 }
 
+/* Full viewport, not boxed around the plate — the surge has to cross the page. */
 .board {
   position: absolute;
-  inset: -18%;
-  width: 136%;
-  height: 136%;
-  overflow: visible;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   transition:
-    opacity 0.4s ease,
+    opacity 0.45s ease,
     transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -85,32 +85,41 @@
   transform: scale(1.12);
 }
 
+/* Stroke widths are tuned for the `slice` scale: on a 1884px-wide viewport the
+   1000-unit box renders at ~1.9x, so 1.8 units lands near 3.4 device pixels. */
 .trace {
   fill: none;
-  stroke: rgba(96, 165, 250, 0.16);
-  stroke-width: 2.4;
+  stroke: rgba(96, 165, 250, 0.15);
+  stroke-width: 1.8;
   stroke-linejoin: round;
 }
 
 .trace[data-gold="true"] {
-  stroke: rgba(199, 162, 74, 0.2);
+  stroke: rgba(199, 162, 74, 0.19);
+}
+
+/* Pad where a run changes layer. */
+.via {
+  fill: rgba(96, 165, 250, 0.22);
 }
 
 /*
  * The surge. A short bright dash walks each trace from the chip outward; the
  * dash array is longer than any path so only one charge is ever in flight.
  */
+/* The runs are now ~1000-1250 units long, so the dash and its travel had to
+   grow with them or the charge would stop partway across the page. */
 .pulse {
   fill: none;
   stroke: #7dd3fc;
-  stroke-width: 3.2;
+  stroke-width: 2.6;
   stroke-linecap: round;
   stroke-linejoin: round;
-  stroke-dasharray: 70 1400;
-  stroke-dashoffset: 70;
+  stroke-dasharray: 120 3000;
+  stroke-dashoffset: 120;
   opacity: 0;
-  filter: drop-shadow(0 0 6px rgba(125, 211, 252, 0.9));
-  animation: surge 1.55s cubic-bezier(0.25, 0.6, 0.3, 1) infinite;
+  filter: drop-shadow(0 0 5px rgba(125, 211, 252, 0.9));
+  animation: surge 1.9s cubic-bezier(0.25, 0.6, 0.3, 1) infinite;
 }
 
 .pulse[data-gold="true"] {
@@ -120,17 +129,17 @@
 
 @keyframes surge {
   0% {
-    stroke-dashoffset: 70;
+    stroke-dashoffset: 120;
     opacity: 0;
   }
-  12% {
+  10% {
     opacity: 1;
   }
-  78% {
-    opacity: 0.9;
+  82% {
+    opacity: 0.85;
   }
   100% {
-    stroke-dashoffset: -760;
+    stroke-dashoffset: -1400;
     opacity: 0;
   }
 }
@@ -154,7 +163,7 @@
      costs the reader nothing. */
   transition:
     transform 0.75s cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 1.8s ease 0.75s;
+    opacity 2s ease 0.75s;
 }
 
 /*
@@ -174,10 +183,50 @@
   opacity: 0;
 }
 
+/*
+ * Matching the hero chip's tone.
+ *
+ * The hero is not this texture — it is this texture through a
+ * meshStandardMaterial whose emissiveMap is the same image, tinted with the
+ * layer accent (#7dd3fc) at an emissiveIntensity of about 1.0, then run through
+ * ACES tone mapping. Net effect: a cyan lift that follows the texture's own
+ * luminance (bright pads lift, dark substrate stays dark) and slightly
+ * compressed highlights.
+ *
+ * A flat overlay would lift the blacks too, which is the wrong shape. So the
+ * glow layer multiplies the texture by the accent first — reproducing
+ * `emissive = texture x accent` — and only then screens it over the plate.
+ *
+ * These three are the tuning knobs. Raise --plate-glow for more cyan lift,
+ * --plate-brightness for overall level.
+ */
+.chip {
+  --plate-brightness: 0.97;
+  --plate-contrast: 0.98;
+  --plate-glow: 0.15;
+}
+
 .chipImg {
   width: 100%;
   height: auto;
-  filter: drop-shadow(0 26px 50px rgba(0, 0, 0, 0.95));
+  filter: brightness(var(--plate-brightness)) contrast(var(--plate-contrast))
+    drop-shadow(0 26px 50px rgba(0, 0, 0, 0.95));
+}
+
+/* The emissive term: texture x accent, screened back over the plate. */
+.chipGlow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    url("/assets/chip/layer-top.webp"),
+    linear-gradient(#7dd3fc, #7dd3fc);
+  background-blend-mode: multiply;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  mix-blend-mode: screen;
+  opacity: var(--plate-glow);
 }
 
 /* Light building in the die while the package energises. */
