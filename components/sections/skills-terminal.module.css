@@ -1,0 +1,152 @@
+/*
+ * Interactive shell under the skill graph.
+ *
+ * Fixed overall height with the log scrolling inside it: the panel must not
+ * resize as output accumulates, or every command would shove the graph above it
+ * up the page.
+ */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  height: clamp(11rem, 15vh + 6rem, 15rem);
+  overflow: hidden;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.5rem 0.75rem;
+  flex: 0 0 auto;
+}
+
+.dots {
+  display: inline-flex;
+  gap: 0.3rem;
+}
+
+.dots i {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  opacity: 0.85;
+}
+
+.title {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: #b8bdca;
+  letter-spacing: 0.04em;
+}
+
+.meta {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  text-transform: lowercase;
+  letter-spacing: 0.1em;
+  color: var(--accent-emerald);
+}
+
+.body {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  flex-direction: column;
+  padding: 0.6rem 0.85rem 0.7rem;
+  font-family: var(--font-mono);
+  font-size: clamp(0.72rem, 0.85vw, 0.82rem);
+  line-height: 1.55;
+  cursor: text;
+}
+
+.log {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.line {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.prompt {
+  color: var(--accent-emerald);
+  margin-right: 0.45rem;
+  user-select: none;
+}
+
+/* Echoed command — brightest, because it is what the reader just typed. */
+.cmd {
+  color: #eceef3;
+}
+
+.out {
+  color: #c3c7d3;
+}
+
+.head {
+  color: var(--accent-gold);
+  letter-spacing: 0.12em;
+  margin-top: 0.35rem;
+}
+
+.err {
+  color: #f0808a;
+}
+
+.meta,
+.line.meta {
+  color: #8f94a4;
+}
+
+.peek {
+  flex: 0 0 auto;
+  margin-top: 0.3rem;
+  padding-top: 0.35rem;
+  border-top: 1px dashed rgba(255, 255, 255, 0.09);
+  color: #d4d8e2;
+}
+
+.dim {
+  color: #8f94a4;
+}
+
+.arrow {
+  color: var(--accent-gold);
+}
+
+.inputRow {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  margin-top: 0.4rem;
+}
+
+.input {
+  flex: 1 1 auto;
+  min-width: 0;
+  background: none;
+  border: 0;
+  outline: none;
+  color: #f2f4f8;
+  font: inherit;
+  caret-color: var(--accent-emerald);
+}
+
+.input::placeholder {
+  color: #6f7484;
+}
+
+/* The whole panel signals focus, since the input itself has no border. */
+.wrap:focus-within {
+  border-color: rgba(52, 211, 153, 0.45);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 0 0 1px rgba(52, 211, 153, 0.22),
+    0 18px 40px -20px rgba(0, 0, 0, 0.95);
+}

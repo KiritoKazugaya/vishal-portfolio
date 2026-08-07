@@ -82,12 +82,32 @@
 
   display: none;
   flex-direction: column;
-  gap: clamp(0.4rem, 1.1vw, 0.9rem);
-  width: min(100%, calc(100svh - var(--reserve)));
-  aspect-ratio: 1 / 1;
+  /*
+   * Width is no longer chained to the viewport height.
+   *
+   * The old `width: min(100%, 100svh - reserve)` with aspect-ratio 1/1 meant a
+   * short-but-wide display sized the square off its HEIGHT, stranding ~430px of
+   * dead space either side of the graph. Height still tracks the viewport so the
+   * stage fills the screen; width now takes the whole column, which is what
+   * gives every capsule room to breathe.
+   */
+  width: 100%;
+  height: clamp(32rem, calc(100svh - var(--reserve)), 52rem);
   margin-inline: auto;
-  padding: clamp(0.7rem, 1.4vw, 1.3rem);
+  padding: clamp(0.9rem, 1.8vw, 1.9rem);
   container-type: inline-size;
+}
+
+/* The shell sits below the stage so the graph keeps its full height. */
+.console {
+  display: none;
+  margin-top: clamp(0.6rem, 1.2vw, 1rem);
+}
+
+@media (min-width: 58rem) and (min-height: 44rem) {
+  .console {
+    display: block;
+  }
 }
 
 /*
@@ -179,9 +199,15 @@
   transform: translate(-50%, -50%);
   display: flex;
   align-items: center;
-  gap: clamp(3px, 0.55cqi, 6px);
+  gap: clamp(3px, 0.55cqi, 8px);
   width: var(--cap-w);
-  padding: clamp(2px, 0.55cqi, 8px) clamp(3px, 0.6cqi, 9px);
+  /*
+   * cqi tracks container WIDTH, but row pitch is set by the stage's HEIGHT.
+   * Now that the stage is full-width, the unclamped values grew a 48px capsule
+   * into a 50px row — 2px of air. These ceilings keep roughly a third of the
+   * pitch as gap while still scaling up on smaller stages.
+   */
+  padding: clamp(2px, 0.5cqi, 6px) clamp(3px, 0.6cqi, 12px);
   border-radius: 999px;
   text-align: left;
   cursor: pointer;
@@ -220,7 +246,7 @@
 .bead {
   position: relative;
   flex: 0 0 auto;
-  width: calc(clamp(8px, 1.5cqi, 24px) * var(--wf, 1));
+  width: calc(clamp(8px, 1.5cqi, 17px) * var(--wf, 1));
   aspect-ratio: 1 / 1;
   border-radius: 50%;
   background:
@@ -270,7 +296,7 @@
   /* The floor must stay below 1.5cqi at the smallest square the media query
      lets through (560px → 8.0px), or the text outgrows its capsule and clips.
      Half a pixel of margin so a font-metric difference cannot tip it over. */
-  font-size: clamp(7.5px, 1.5cqi, 17px);
+  font-size: clamp(7.5px, 1.4cqi, 14px);
   line-height: 1.15;
   letter-spacing: -0.012em;
   color: var(--color-mute);
@@ -286,9 +312,30 @@
   color: var(--color-chalk);
 }
 
-/* Hub chip — the category, and a second way to work the filter. */
+/*
+ * Group heading.
+ *
+ * It sat in the same pill as the tools, so nothing said which was the category
+ * and which was an item. Shape is the fastest differentiator available: the
+ * heading is a squared machined tab, tinted with its own accent and set in bold
+ * uppercase, while every tool stays a lozenge. Size and case do the rest.
+ */
 .hub {
-  border-color: color-mix(in oklab, var(--c) 34%, rgba(255, 255, 255, 0.09));
+  border-radius: 10px;
+  padding-block: clamp(5px, 0.85cqi, 11px);
+  border-color: color-mix(in oklab, var(--c) 48%, rgba(255, 255, 255, 0.12));
+  background:
+    linear-gradient(
+      158deg,
+      rgba(255, 255, 255, 0.11) 0%,
+      rgba(255, 255, 255, 0.02) 55%,
+      rgba(255, 255, 255, 0.06) 100%
+    ),
+    color-mix(in oklab, var(--c) 13%, rgba(9, 9, 13, 0.92));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 0 0 1px color-mix(in oklab, var(--c) 20%, transparent),
+    0 12px 26px -14px rgba(0, 0, 0, 0.95);
 }
 
 .hubOn {
@@ -305,7 +352,10 @@
   min-width: 0;
   flex: 1 1 auto;
   /* Same floor rule as .label, one notch lower because the hub runs at 1.4cqi. */
-  font-size: clamp(7px, 1.4cqi, 15px);
+  font-size: clamp(8px, 1.65cqi, 17px);
+  font-weight: 700;
+  letter-spacing: 0.075em;
+  text-transform: uppercase;
   font-weight: 600;
   letter-spacing: -0.005em;
   line-height: 1.2;
@@ -314,11 +364,12 @@
   text-overflow: ellipsis;
 }
 
-/* The core the rails leave from. Sits on the seam between graph and terminal. */
+/* The core the rails leave from — top-centre, so the eye starts there and the
+   column reads downward: core, heading, then tools. */
 .core {
   position: absolute;
   left: 50%;
-  top: 100%;
+  top: 0;
   transform: translate(-50%, -50%);
   width: clamp(11px, 2.1cqi, 19px);
   aspect-ratio: 1 / 1;

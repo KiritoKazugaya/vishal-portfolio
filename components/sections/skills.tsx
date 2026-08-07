@@ -6,6 +6,7 @@ import type { CSSProperties } from "react"
 import { Chapter } from "@/components/ui/chapter"
 import { skillGroups } from "@/lib/data"
 import type { Skill, SkillCategory } from "@/lib/types"
+import { SkillTerminal } from "./skills-terminal"
 import styles from "./skills.module.css"
 
 /* -------------------------------------------------------------------------- */
@@ -22,8 +23,13 @@ const COLS = skillGroups.length
 /** One row for the hub chip, then one per skill in the tallest category. */
 const ROWS = 1 + Math.max(...skillGroups.map((g) => g.skills.length))
 const COL_W = 100 / COLS
-/** Below this the rails bend toward the core; above it they run straight up. */
+/**
+ * Reading order runs top-down: core, then the group heading, then its tools.
+ * FAN is the vertical band the rows occupy; TOP is the strip above it where the
+ * rails run horizontally out of the core before turning down.
+ */
 const FAN = 92
+const TOP = 100 - FAN
 const ROW_H = FAN / ROWS
 /*
  * Rail sits at the left of its column, capsules hang off it to the right.
@@ -33,15 +39,22 @@ const ROW_H = FAN / ROWS
  */
 const RAIL_DX = -0.45 * COL_W
 const CAP_DX = 0.04 * COL_W
-const CAP_W = 0.86 * COL_W
+/*
+ * The gap to the next column's rail is the "padding between sections".
+ * 0.78 opened that gap nicely but clipped the three longest labels ("Prompt
+ * Engineering", "Backend & MLOps", "Databases & Tools") once the stage narrowed
+ * to ~944px. 0.84 fits all of them and still leaves ~27px between columns at a
+ * wide stage, because widening the stage did most of the work already.
+ */
+const CAP_W = 0.84 * COL_W
 
 const TOTAL = skillGroups.reduce((n, g) => n + g.skills.length, 0)
 /** One full travel of the charge, in seconds. */
 const DUR = 3.6
 
 const colX = (i: number) => (i + 0.5) * COL_W
-/** Row 0 is the hub chip; row 1 upward are skills. */
-const rowY = (r: number) => FAN - (r + 0.5) * ROW_H
+/** Row 0 is the group heading; rows 1+ are its tools, descending. */
+const rowY = (r: number) => TOP + (r + 0.5) * ROW_H
 
 const HUE: Record<SkillCategory, string> = {
   "AI/ML": "#a78bfa",
@@ -60,18 +73,18 @@ const DEPTH: Record<Skill["weight"], string> = {
 /** Weight only changes the bead's diameter — never its position. */
 const BEAD_SCALE: Record<Skill["weight"], number> = { 1: 0.78, 2: 1, 3: 1.2 }
 
-/** Core -> horizontal run -> rounded elbow -> straight up to the last node. */
-function railPath(railPx: number, w: number, h: number, topPx: number) {
+/** Core -> horizontal run -> rounded elbow -> straight down to the last node. */
+function railPath(railPx: number, w: number, h: number, botPx: number) {
   const sx = w / 2
   const dx = railPx - sx
-  if (Math.abs(dx) < 1) return `M ${sx.toFixed(1)} ${h} L ${sx.toFixed(1)} ${topPx.toFixed(1)}`
+  if (Math.abs(dx) < 1) return `M ${sx.toFixed(1)} 0 L ${sx.toFixed(1)} ${botPx.toFixed(1)}`
   const dir = Math.sign(dx)
   const e = Math.min(30, Math.abs(dx), h * 0.07)
   return [
-    `M ${sx.toFixed(1)} ${h}`,
-    `L ${(railPx - dir * e).toFixed(1)} ${h}`,
-    `Q ${railPx.toFixed(1)} ${h} ${railPx.toFixed(1)} ${(h - e).toFixed(1)}`,
-    `L ${railPx.toFixed(1)} ${topPx.toFixed(1)}`,
+    `M ${sx.toFixed(1)} 0`,
+    `L ${(railPx - dir * e).toFixed(1)} 0`,
+    `Q ${railPx.toFixed(1)} 0 ${railPx.toFixed(1)} ${e.toFixed(1)}`,
+    `L ${railPx.toFixed(1)} ${botPx.toFixed(1)}`,
   ].join(" ")
 }
 
@@ -108,28 +121,28 @@ export function Skills() {
 
   const columns = useMemo(() => {
     const { w, h } = box
-    const fanPx = (FAN / 100) * h
 
     return skillGroups.map((group, i) => {
       const cx = colX(i)
       const railX = cx + RAIL_DX
       const capX = cx + CAP_DX
       const count = group.skills.length
-      const topPx = (rowY(count) / 100) * h
+      // The rail stops at the last tool in the column.
+      const botPx = (rowY(count) / 100) * h
       const railPx = (railX / 100) * w
 
       // Distance travelled before the rail turns vertical, so a node's flash
       // lines up with the charge instead of guessing from the row index.
-      const fanLen = Math.abs(w / 2 - railPx) + (h - fanPx)
-      const span = Math.max(1, fanLen + (fanPx - topPx))
-      const at = (y: number) => (fanLen + (fanPx - (y / 100) * h)) / span
+      const fanLen = Math.abs(w / 2 - railPx)
+      const span = Math.max(1, fanLen + botPx)
+      const at = (y: number) => (fanLen + (y / 100) * h) / span
       const stagger = i * 0.55
       const timeOf = (y: number) => stagger + DUR * (0.06 + 0.88 * at(y))
 
       const hubY = rowY(0)
       const nodes: Placed[] = group.skills.map((skill, j) => {
-        // First skill in the data sits at the top, so the column reads down.
-        const y = rowY(count - j)
+        // Row 0 is the heading, so the first tool sits directly beneath it.
+        const y = rowY(j + 1)
         return { skill, y, delay: timeOf(y) }
       })
 
@@ -140,7 +153,7 @@ export function Skills() {
         capX,
         hubY,
         hubDelay: timeOf(hubY),
-        d: railPath(railPx, w, h, topPx),
+        d: railPath(railPx, w, h, botPx),
         stagger,
         nodes,
       }
@@ -296,7 +309,11 @@ export function Skills() {
                       onClick={() => toggle(col.group.category)}
                     >
                       <span className={styles.bead} aria-hidden />
-                      <span className={`${styles.hubLabel} inlay-soft`}>{col.group.label}</span>
+                      {/* The short category, not the full label: "Databases &
+                          Tools" cannot fit a 150px capsule at heading size and
+                          weight. The filter pill above still carries the long
+                          form, and the aria-label below has it in full. */}
+                      <span className={`${styles.hubLabel} inlay-soft`}>{col.group.category}</span>
                     </button>
                 </div>
               )
@@ -305,33 +322,12 @@ export function Skills() {
             <span className={styles.core} aria-hidden />
           </div>
 
-          {/* ------------------------------------------------------ read-out */}
-          <div className={`terminal ${styles.term}`} aria-hidden>
-            <div className={`terminal-bar ${styles.termBar}`}>
-              <span className={styles.dots}>
-                <i style={{ background: "#ff5f57" }} />
-                <i style={{ background: "#febc2e" }} />
-                <i style={{ background: "#28c840" }} />
-              </span>
-              <span className={styles.termTitle}>where.sh — skill provenance</span>
-              <span className={styles.termMeta}>{active ? active.category : "idle"}</span>
-            </div>
+        </div>
 
-            <div className={styles.termBody}>
-              <p className={`${styles.line} ${styles.cmd}`}>
-                <span className={styles.prompt}>$</span> where --skill{" "}
-                <span className={styles.arg}>&quot;{active ? active.name : "…"}&quot;</span>
-              </p>
-              <p className={`${styles.line} ${styles.out} caret`}>
-                {active ? active.usedIn : "awaiting a node — hover or tab into one"}
-              </p>
-              <p className={`${styles.line} ${styles.meta}`}>
-                {active
-                  ? `// ${active.category} · ${DEPTH[active.weight]}`
-                  : `// ${TOTAL} tools indexed across ${COLS} groups`}
-              </p>
-            </div>
-          </div>
+        {/* Working shell over the index — sits outside the square so the graph
+            keeps its full height and the log can grow without squeezing it. */}
+        <div className={styles.console}>
+          <SkillTerminal hovered={active} />
         </div>
 
         {/* Grouped list — the small-screen view, and the text alternative. */}
