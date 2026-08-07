@@ -86,60 +86,82 @@
 }
 
 /* Stroke widths are tuned for the `slice` scale: on a 1884px-wide viewport the
-   1000-unit box renders at ~1.9x, so 1.8 units lands near 3.4 device pixels. */
+   1000-unit box renders at ~1.9x, so 2.6 units lands near 5 device pixels. */
 .trace {
   fill: none;
-  stroke: rgba(96, 165, 250, 0.15);
-  stroke-width: 1.8;
+  stroke: rgba(96, 165, 250, 0.2);
+  stroke-width: 2.6;
   stroke-linejoin: round;
 }
 
 .trace[data-gold="true"] {
-  stroke: rgba(199, 162, 74, 0.19);
+  stroke: rgba(199, 162, 74, 0.24);
 }
 
-/* Pad where a run changes layer. */
-.via {
-  fill: rgba(96, 165, 250, 0.22);
+/* Dead-end spur — texture, not routing. */
+.stub {
+  fill: none;
+  stroke: rgba(96, 165, 250, 0.16);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+/* Square pad where a run changes direction. */
+.pad {
+  fill: rgba(96, 165, 250, 0.26);
+}
+
+.pad[data-gold="true"] {
+  fill: rgba(199, 162, 74, 0.3);
 }
 
 /*
  * The surge. A short bright dash walks each trace from the chip outward; the
  * dash array is longer than any path so only one charge is ever in flight.
  */
-/* The runs are now ~1000-1250 units long, so the dash and its travel had to
-   grow with them or the charge would stop partway across the page. */
-.pulse {
+/*
+ * Energy, not a spark.
+ *
+ * Deliberately no drop-shadow. A filter on a path whose stroke-dashoffset
+ * animates forces a full re-filter of that path every frame, at the ~1.9x
+ * `slice` scale — with dozens of them running that was the jank, not the
+ * loading. The glow is carried by a thick round-capped stroke and a long dash
+ * instead, which costs nothing.
+ *
+ * Only every third lane carries energy, and only its outer run: 6 a side
+ * rather than 32, so the field can be dense without the animation being.
+ */
+.energy {
   fill: none;
-  stroke: #7dd3fc;
-  stroke-width: 2.6;
+  stroke: #a8e6ff;
+  stroke-width: 7;
   stroke-linecap: round;
   stroke-linejoin: round;
-  stroke-dasharray: 120 3000;
-  stroke-dashoffset: 120;
+  stroke-dasharray: 210 3400;
+  stroke-dashoffset: 210;
   opacity: 0;
-  filter: drop-shadow(0 0 5px rgba(125, 211, 252, 0.9));
-  animation: surge 1.9s cubic-bezier(0.25, 0.6, 0.3, 1) infinite;
+  animation: surge 4.2s linear infinite;
 }
 
-.pulse[data-gold="true"] {
-  stroke: #f0d894;
-  filter: drop-shadow(0 0 6px rgba(240, 216, 148, 0.85));
+.energy[data-gold="true"] {
+  stroke: #ffe6a8;
 }
 
+/* Linear, and slow: it should read as power moving outward under load, not as
+   a spark being fired. */
 @keyframes surge {
   0% {
-    stroke-dashoffset: 120;
+    stroke-dashoffset: 210;
     opacity: 0;
   }
-  10% {
-    opacity: 1;
+  8% {
+    opacity: 0.95;
   }
-  82% {
-    opacity: 0.85;
+  86% {
+    opacity: 0.75;
   }
   100% {
-    stroke-dashoffset: -1400;
+    stroke-dashoffset: -1500;
     opacity: 0;
   }
 }
@@ -338,12 +360,12 @@
 /* -------------------------------------------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
-  .pulse,
+  .energy,
   .core {
     animation: none;
   }
-  .pulse {
-    opacity: 0.5;
+  .energy {
+    opacity: 0.45;
     stroke-dasharray: none;
     stroke-dashoffset: 0;
   }

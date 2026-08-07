@@ -35,39 +35,77 @@ const MAX_MS = 6000
 const EXIT_MS = 2850
 
 const C = 500
-/** Traces begin under the plate, so they read as leaving the package itself. */
+/** Runs begin under the plate, so they read as leaving the package itself. */
 const START = 58
 
 /*
- * Fourteen lanes off one edge, mirrored to four sides. The board is drawn over
- * the whole viewport rather than boxed around the chip, so the surge crosses
- * the page instead of stopping at the plate — the fan is wide enough and the
- * runs long enough that the traces leave the frame on every side.
+ * Board layout.
+ *
+ * Sixteen lanes off one edge, each carrying a pair of parallel runs, mirrored
+ * to four sides — a bundled fan rather than single wires, which is what makes
+ * it read as a board instead of a starburst. Every run doglegs at 45 degrees at
+ * its own distance out, so the bends stagger into diagonal ranks the way they
+ * do on a real substrate.
+ *
+ * Only a subset carry energy. The static runs are drawn once and never touched;
+ * animating all of them would repaint the whole field every frame for no extra
+ * legibility.
  */
-const OFFSETS = [-172, -142, -114, -88, -64, -42, -20, 20, 42, 64, 88, 114, 142, 172]
+const LANES = [-196, -170, -146, -124, -104, -86, -70, -56, -44, -34, 34, 44, 56, 70, 86, 104]
+/** Second run of each pair, offset by this much. */
+const PAIR_GAP = 9
 
-function buildTraces() {
-  return OFFSETS.map((o, i) => {
-    const spread = o * 2.8
-    const bend = C - START - 86 - Math.abs(o) * 0.72
+export interface Run {
+  d: string
+  pad: { x: number; y: number }
+  stub: string | null
+  gold: boolean
+  live: boolean
+  delay: number
+}
+
+function buildBoard(): Run[] {
+  const runs: Run[] = []
+
+  LANES.forEach((o, i) => {
+    const dir = Math.sign(o)
+    const spread = o * 2.55
     const diag = Math.abs(spread - o)
-    return {
-      d: [
-        `M ${C + o} ${C - START}`,
-        `L ${C + o} ${bend}`,
-        `L ${C + spread} ${bend - diag}`,
-        `L ${C + spread} -620`,
-      ].join(" "),
-      via: { x: C + o, y: bend },
-      gold: i % 4 === 1,
-      delay: (Math.abs(o) / 172) * 0.3,
+
+    for (let k = 0; k < 2; k++) {
+      const lat = o + k * PAIR_GAP * dir
+      const out = spread + k * PAIR_GAP * dir
+      const bend = C - START - 62 - Math.abs(o) * 0.7 - k * 16
+
+      runs.push({
+        d: [
+          `M ${C + lat} ${C - START}`,
+          `L ${C + lat} ${bend}`,
+          `L ${C + out} ${bend - diag}`,
+          `L ${C + out} -700`,
+        ].join(" "),
+        pad: { x: C + lat, y: bend },
+        // A short spur off the straight section, capped with a pad — the small
+        // dead-end stubs that give a real board its texture.
+        stub:
+          k === 0 && i % 3 === 0
+            ? `M ${C + lat} ${bend - diag - 90} L ${C + out + 26 * dir} ${bend - diag - 90}`
+            : null,
+        gold: i % 3 === 1,
+        // Every third lane, outer run only: 10 charges a side rather than 32.
+        live: k === 1 && i % 3 === 0,
+        delay: (Math.abs(o) / 196) * 0.9,
+      })
     }
   })
+
+  return runs
 }
 
 /* Geometry is fixed, so it is built once at module scope rather than memoised
    per mount — there is nothing for it to depend on. */
-const TRACES = buildTraces()
+const RUNS = buildBoard()
+const LIVE = RUNS.filter((r) => r.live)
 
 export function Preloader() {
   const sceneReady = useSceneReady()
@@ -154,19 +192,31 @@ export function Preloader() {
       >
         {[0, 90, 180, 270].map((rot) => (
           <g key={rot} transform={`rotate(${rot} ${C} ${C})`}>
-            {TRACES.map((t, i) => (
-              <path key={`b${i}`} d={t.d} className={s.trace} data-gold={t.gold} />
+            {RUNS.map((r, i) => (
+              <path key={`b${i}`} d={r.d} className={s.trace} data-gold={r.gold} />
             ))}
-            {TRACES.map((t, i) => (
-              <circle key={`v${i}`} cx={t.via.x} cy={t.via.y} r="3.4" className={s.via} />
-            ))}
-            {TRACES.map((t, i) => (
-              <path
+            {RUNS.map((r, i) =>
+              r.stub ? <path key={`s${i}`} d={r.stub} className={s.stub} /> : null,
+            )}
+            {RUNS.map((r, i) => (
+              <rect
                 key={`p${i}`}
-                d={t.d}
-                className={s.pulse}
-                data-gold={t.gold}
-                style={{ animationDelay: `${t.delay + rot / 900}s` }}
+                x={r.pad.x - 3.6}
+                y={r.pad.y - 3.6}
+                width="7.2"
+                height="7.2"
+                rx="1.4"
+                className={s.pad}
+                data-gold={r.gold}
+              />
+            ))}
+            {LIVE.map((r, i) => (
+              <path
+                key={`e${i}`}
+                d={r.d}
+                className={s.energy}
+                data-gold={r.gold}
+                style={{ animationDelay: `${r.delay + rot * 0.12}s` }}
               />
             ))}
           </g>
