@@ -1,0 +1,103 @@
+/*
+ * Scroll cue.
+ *
+ * A label alone on a near-black page is easy to miss, and a single static arrow
+ * reads as decoration. Three chevrons firing in sequence read as direction —
+ * and on this page they double as the same signal language as the current
+ * running down the chip: a charge arriving, one contact after the next.
+ */
+
+.cue {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(0.6rem, 1.3vh, 1rem);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: clamp(0.5rem, 0.9vw, 0.7rem) clamp(1rem, 2vw, 1.5rem);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.9),
+    0 18px 36px -20px rgba(0, 0, 0, 1);
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: clamp(0.6rem, 0.75vw, 0.72rem);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.chevrons {
+  width: clamp(28px, 2.6vw, 44px);
+  height: auto;
+  overflow: visible;
+  /* Metal needs somewhere for its light to fall off, or it reads as flat ink. */
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.95))
+    drop-shadow(0 0 7px rgba(199, 162, 74, 0.28));
+}
+
+/* The stack breathes downward as a whole… */
+.stack {
+  animation: cue-drift 2.4s ease-in-out infinite;
+}
+
+/* …while each chevron lights in turn, so the eye is pulled down the column. */
+.chev {
+  opacity: 0.16;
+  animation: cue-cascade 2.4s ease-in-out infinite;
+}
+
+.chev:nth-of-type(2) {
+  animation-delay: 0.16s;
+}
+
+.chev:nth-of-type(3) {
+  animation-delay: 0.32s;
+}
+
+@keyframes cue-cascade {
+  0%,
+  58%,
+  100% {
+    opacity: 0.16;
+  }
+  20% {
+    opacity: 1;
+  }
+}
+
+@keyframes cue-drift {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(2.5px);
+  }
+}
+
+.cue:hover .chev,
+.cue:focus-visible .chev {
+  animation-duration: 1.4s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stack,
+  .chev {
+    animation: none;
+  }
+  /* Static, but still legible as three arrows rather than one ghost. */
+  .chev {
+    opacity: 0.75;
+  }
+  .chev:nth-of-type(2) {
+    opacity: 0.5;
+  }
+  .chev:nth-of-type(3) {
+    opacity: 0.3;
+  }
+}

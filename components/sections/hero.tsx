@@ -1,4 +1,5 @@
 import { contact, profile } from "@/lib/data"
+import s from "./hero.module.css"
 
 /**
  * The opening act.
@@ -48,27 +49,50 @@ export function Hero() {
           </div>
         </div>
 
-        {/* Recessed pill on near-black: the travelling spark is what makes it findable. */}
-        <div className="mt-[clamp(2rem,4vh,3.5rem)] flex justify-center">
-          <a
-            href="#package"
-            aria-label="Scroll down to power on the chip"
-            className="spark-frame group inline-flex items-center gap-3 px-[clamp(1rem,2vw,1.5rem)] py-[clamp(0.5rem,0.9vw,0.7rem)] shadow-[0_0_0_1px_rgba(0,0,0,0.9),0_18px_36px_-20px_rgba(0,0,0,1)]"
-          >
-            <span className="font-mono text-[clamp(0.6rem,0.75vw,0.72rem)] uppercase tracking-[0.24em] text-faint transition-colors group-hover:text-chalk group-focus-visible:text-chalk">
-              Scroll to power on
+        {/* Recessed pill on near-black: the travelling spark is what makes it
+            findable, and the chevrons below say which way to go. */}
+        {/* Nudged back to the viewport centre. Everything else aligns to the
+            content column, but this cue points at the chip, and the chip is
+            centred on the viewport — the rail reservation would otherwise push
+            it ~110px off its own subject. Collapses to 0 below 1024px. */}
+        <div className="mt-[clamp(1.75rem,3.5vh,3rem)] flex translate-x-[calc(var(--rail-space)/-2)] justify-center">
+          <a href="#package" aria-label="Scroll down to power on the chip" className={s.cue}>
+            <span className={`spark-frame ${s.pill}`}>
+              <span className={`inlay-soft ${s.label}`}>Scroll to power on</span>
             </span>
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden
-              className="cue-breathe h-4 w-4 shrink-0 text-gold"
-            >
-              <path d="M6 9l6 6 6-6" />
+
+            <svg viewBox="0 0 40 38" className={s.chevrons} aria-hidden focusable="false">
+              <defs>
+                {/*
+                  One gradient in user space across the whole stack, so the three
+                  chevrons read as a single machined piece catching one light
+                  source — the same alternating specular/dark banding the gold
+                  headings use.
+                */}
+                <linearGradient id="cue-gold" x1="0" y1="0" x2="0" y2="38" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor="#7d5f25" />
+                  <stop offset="11%" stopColor="#f6e6ba" />
+                  <stop offset="22%" stopColor="#c9a24d" />
+                  <stop offset="38%" stopColor="#fffbe8" />
+                  <stop offset="52%" stopColor="#96742a" />
+                  <stop offset="68%" stopColor="#f8ecbb" />
+                  <stop offset="84%" stopColor="#cda751" />
+                  <stop offset="100%" stopColor="#7d5f25" />
+                </linearGradient>
+              </defs>
+
+              <g
+                className={s.stack}
+                fill="none"
+                stroke="url(#cue-gold)"
+                strokeWidth="3.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path className={s.chev} d="M5 4 L20 15 L35 4" />
+                <path className={s.chev} d="M5 15 L20 26 L35 15" />
+                <path className={s.chev} d="M5 26 L20 37 L35 26" />
+              </g>
             </svg>
           </a>
         </div>
