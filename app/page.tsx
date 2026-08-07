@@ -1,4 +1,5 @@
 import { ChipCanvas } from "@/components/chip/chip-canvas"
+import { Preloader } from "@/components/preloader/preloader"
 import { LayerRail, Nav } from "@/components/nav/nav"
 import { ScrollRuntime } from "@/components/scroll-runtime"
 import { About } from "@/components/sections/about"
@@ -11,6 +12,15 @@ import { Skills } from "@/components/sections/skills"
 export default function Home() {
   return (
     <>
+      {/* Covers the gap until the WebGL chip is ready, then hands off to it.
+          Rendered server-side so it is painted before anything else; the
+          noscript rule removes it for anyone without JS, who would otherwise
+          be left staring at a loader that can never finish. */}
+      <noscript>
+        <style>{`[data-preloader]{display:none!important}`}</style>
+      </noscript>
+      <Preloader />
+
       {/* Fixed WebGL stage. Everything below scrolls over it. */}
       <ChipCanvas />
 

@@ -1,7 +1,12 @@
 "use client"
 
 import { useSyncExternalStore } from "react"
-import { getActive, getHeroDone, subscribeActive } from "@/lib/scroll-store"
+import {
+  getActive,
+  getHeroDone,
+  getSceneReady,
+  subscribeActive,
+} from "@/lib/scroll-store"
 
 /**
  * Reads the active layer from the chip store.
@@ -21,4 +26,9 @@ export function useActiveLayer() {
  */
 export function useHeroDone() {
   return useSyncExternalStore(subscribeActive, getHeroDone, () => false)
+}
+
+/** True once the chip scene has mounted with its textures resolved. */
+export function useSceneReady() {
+  return useSyncExternalStore(subscribeActive, getSceneReady, () => false)
 }

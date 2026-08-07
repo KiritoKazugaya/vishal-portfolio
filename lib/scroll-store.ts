@@ -71,6 +71,23 @@ let heroDone = false
 export const getHeroDone = () => heroDone
 
 /**
+ * True once the 3D scene has mounted with its textures resolved.
+ *
+ * Measured: the textures themselves take 6-10ms to fetch, but nothing requests
+ * them until ~1.7s in, because the request only happens once React has
+ * hydrated and the Canvas has initialised. That gap is the visible wait, so the
+ * preloader has to hold until this flips rather than guess at a duration.
+ */
+let sceneReady = false
+export const getSceneReady = () => sceneReady
+
+export function setSceneReady(ready: boolean) {
+  if (sceneReady === ready) return
+  sceneReady = ready
+  listeners.forEach((cb) => cb())
+}
+
+/**
  * Set the active layer and notify React.
  *
  * Pushing the change is deliberate — an rAF poll would be simpler but stops

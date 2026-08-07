@@ -1,12 +1,12 @@
 "use client"
 
-import { useMemo, useRef } from "react"
+import { useEffect, useMemo, useRef } from "react"
 import { useFrame, useThree } from "@react-three/fiber"
 import { Environment, Lightformer } from "@react-three/drei"
 import * as THREE from "three"
 
 import { LAYERS } from "@/lib/chip-config"
-import { chipState, damp, lerp, smooth } from "@/lib/scroll-store"
+import { chipState, damp, lerp, setSceneReady, smooth } from "@/lib/scroll-store"
 import { ChipLayer } from "./chip-layer"
 import { CurrentFlow } from "./current-flow"
 
@@ -121,6 +121,13 @@ function FocusLight() {
 }
 
 export function ChipScene({ density }: { density: number }) {
+  /* useTexture suspends, so by the time this renders every layer texture has
+     resolved — which is exactly the moment the preloader is waiting for. */
+  useEffect(() => {
+    setSceneReady(true)
+    return () => setSceneReady(false)
+  }, [])
+
   return (
     <>
       <color attach="background" args={["#050507"]} />
