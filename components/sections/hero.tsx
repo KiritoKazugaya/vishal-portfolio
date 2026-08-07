@@ -14,8 +14,14 @@ import s from "./hero.module.css"
 export function Hero() {
   return (
     <section id="hero" aria-label="Introduction" className="relative h-[400vh]">
-      {/* Bottom padding is tighter than the top so the scroll cue sits low in frame. */}
-      <div className="sticky top-0 flex h-screen w-full flex-col justify-between overflow-hidden pt-[7rem] pb-[clamp(1.5rem,4vh,2.75rem)] md:pt-[9rem]">
+      {/* Bottom padding is tighter than the top so the scroll cue sits low in frame.
+
+          svh, not vh. On a phone `100vh` is the viewport with the URL bar
+          retracted, so the panel is taller than what is actually on screen and
+          the scroll cue at its bottom edge sits under the browser chrome on
+          first paint. svh is the small — always-visible — viewport, which is
+          the one the cue has to fit inside. Skills already uses it. */}
+      <div className="sticky top-0 flex h-svh w-full flex-col justify-between overflow-hidden pt-[7rem] pb-[clamp(1.5rem,4vh,2.75rem)] md:pt-[9rem]">
       {/*
         Actions sit where the navigation will be: same vertical offset (py-5),
         same .shell, centred like the nav's own link row. Absolutely positioned

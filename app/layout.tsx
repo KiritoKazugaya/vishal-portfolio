@@ -47,10 +47,15 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 }
 
-export const viewport: Viewport = {
-  themeColor: "#050507",
-  colorScheme: "dark",
-}
+/*
+ * No themeColor or colorScheme here.
+ *
+ * Both are static at build time, so they would pin a phone's browser chrome to
+ * the dark theme forever — a light-theme visitor got a black status bar above a
+ * white page. The meta tag is emitted in <head> below and rewritten by the
+ * theme module instead, pre-paint and on every toggle.
+ */
+export const viewport: Viewport = {}
 
 export default function RootLayout({
   children,
@@ -58,6 +63,9 @@ export default function RootLayout({
   return (
     <html lang="en" data-theme="dark" className={`${inter.variable} ${mono.variable}`}>
       <head>
+        {/* Must be parsed before the script below, which rewrites its content
+            to match the resolved theme. */}
+        <meta name="theme-color" content="#050507" />
         {/*
           Resolves the theme before the first paint. It has to be inline and
           synchronous — a bundled module would run a frame late and the page

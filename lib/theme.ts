@@ -15,6 +15,16 @@ export function neonOf(accentToken: string) {
 const KEY = "theme"
 const listeners = new Set<() => void>()
 
+/**
+ * The two --color-void values, as literals.
+ *
+ * A <meta> cannot read a CSS variable, so the phone's browser chrome is the one
+ * surface on the site that has to be told the colour by hand. Duplicated on
+ * purpose, and duplicated again inside THEME_SCRIPT below, which runs before any
+ * module has loaded.
+ */
+const CHROME = { dark: "#050507", light: "#f4f6fa" } as const
+
 /** Mirrors whatever the pre-paint script in the document head already applied. */
 function read(): Theme {
   if (typeof document === "undefined") return "dark"
@@ -46,6 +56,9 @@ export function setTheme(next: Theme) {
      any stylesheet rule — so it has to be updated here too, or native scrollbars
      and form controls stay in the old theme after a toggle. */
   document.documentElement.style.colorScheme = next
+  document
+    .querySelector('meta[name="theme-color"]')
+    ?.setAttribute("content", CHROME[next])
   try {
     localStorage.setItem(KEY, next)
   } catch {
@@ -66,4 +79,4 @@ export function toggleTheme() {
  * document renders — anything bundled would arrive a frame too late and the
  * page would flash the wrong theme.
  */
-export const THEME_SCRIPT = `(function(){try{var t=localStorage.getItem('${KEY}');if(t!=='light'&&t!=='dark'){t=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'}document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t}catch(e){document.documentElement.dataset.theme='dark'}})()`
+export const THEME_SCRIPT = `(function(){try{var t=localStorage.getItem('${KEY}');if(t!=='light'&&t!=='dark'){t=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'}document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t;var m=document.querySelector('meta[name="theme-color"]');if(m)m.content=t==='light'?'${CHROME.light}':'${CHROME.dark}'}catch(e){document.documentElement.dataset.theme='dark'}})()`
