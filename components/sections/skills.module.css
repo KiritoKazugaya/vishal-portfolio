@@ -61,7 +61,7 @@
 }
 
 .pillOn {
-  color: #05060a;
+  color: var(--color-void);
   font-weight: 600;
   background: var(--c);
   border-color: transparent;
@@ -171,7 +171,7 @@
 /* The charge. A 9%-long bright dash walked from the core to the last node. */
 .charge {
   fill: none;
-  stroke: color-mix(in oklab, var(--c) 55%, #ffffff);
+  stroke: color-mix(in oklab, var(--c) 55%, var(--tint));
   stroke-width: 2.1;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -258,12 +258,12 @@
     ),
     radial-gradient(
       circle at 50% 116%,
-      color-mix(in oklab, var(--c) 60%, #ffffff) 0 34%,
+      color-mix(in oklab, var(--c) 60%, var(--tint)) 0 34%,
       transparent 60%
     ),
     radial-gradient(
       circle at 50% 42%,
-      color-mix(in oklab, var(--c) 96%, #ffffff) 0 40%,
+      color-mix(in oklab, var(--c) 96%, var(--tint)) 0 40%,
       color-mix(in oklab, var(--c) 62%, #000000) 100%
     );
   box-shadow:
@@ -475,7 +475,7 @@
 }
 
 .arg {
-  color: color-mix(in oklab, var(--c) 85%, #ffffff);
+  color: color-mix(in oklab, var(--c) 85%, var(--tint));
 }
 
 .out {
@@ -579,4 +579,69 @@
   .nodeOn {
     transform: translate(-50%, -50%);
   }
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Light theme                                                                 */
+/*                                                                              */
+/*  The capsule is built from a dark fill plus a white sheen, and both invert    */
+/*  badly on a light page — the sheen disappears and the fill leaves a field of  */
+/*  grey pills carrying dark ink at 1.4:1. On white a capsule is defined by its  */
+/*  rim instead, in its own rail's hue, so the graph still colour-codes itself.  */
+/* -------------------------------------------------------------------------- */
+
+[data-theme="light"] .node {
+  background: linear-gradient(
+    158deg,
+    #ffffff 0%,
+    color-mix(in oklab, var(--c) 7%, #ffffff) 100%
+  );
+  border-color: color-mix(in oklab, var(--c) 40%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    0 0 0 1px color-mix(in oklab, var(--c) 10%, transparent),
+    0 8px 18px -12px color-mix(in oklab, var(--c) 55%, transparent);
+}
+
+[data-theme="light"] .node:hover,
+[data-theme="light"] .node:focus-visible,
+[data-theme="light"] .nodeOn {
+  border-color: color-mix(in oklab, var(--c) 80%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    0 0 0 1px color-mix(in oklab, var(--c) 28%, transparent),
+    0 12px 24px -12px color-mix(in oklab, var(--c) 70%, transparent);
+}
+
+/* The heading tab keeps its stronger tint — shape and weight are what separate
+   it from the lozenges, and a white-on-white tab would give up half of that. */
+[data-theme="light"] .hub {
+  background: linear-gradient(
+    158deg,
+    color-mix(in oklab, var(--c) 9%, #ffffff) 0%,
+    color-mix(in oklab, var(--c) 17%, #ffffff) 100%
+  );
+  border-color: color-mix(in oklab, var(--c) 58%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    0 0 0 1px color-mix(in oklab, var(--c) 16%, transparent),
+    0 10px 22px -12px color-mix(in oklab, var(--c) 60%, transparent);
+}
+
+/* A 26–30% rail reads on black because it is the only light in the frame. On
+   white it is the only *dark*, and at that strength it vanishes. */
+[data-theme="light"] .trace,
+[data-theme="light"] .tap {
+  stroke: color-mix(in oklab, var(--c) 52%, transparent);
+}
+
+[data-theme="light"] .live .trace,
+[data-theme="light"] .live .tap {
+  stroke: color-mix(in oklab, var(--c) 90%, transparent);
+}
+
+/* Same rule as the card titles: 15px is small type, so the group tab takes the
+   accent rather than the neon. */
+[data-theme="light"] span.hubLabel {
+  --lit: var(--c);
 }

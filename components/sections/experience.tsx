@@ -6,6 +6,7 @@ import { BarChart3, Briefcase, GraduationCap, Undo2 } from "lucide-react"
 
 import { Chapter } from "@/components/ui/chapter"
 import { experience } from "@/lib/data"
+import { neonOf } from "@/lib/theme"
 import type { ExperienceItem } from "@/lib/types"
 import s from "./experience.module.css"
 
@@ -41,7 +42,12 @@ function Card({ item, side }: { item: ExperienceItem; side: Side }) {
       className={s.card}
       data-flipped={flipped}
       data-side={side}
-      style={{ "--card-accent": `var(${item.accent})` } as CSSProperties}
+      style={
+        {
+          "--card-accent": `var(${item.accent})`,
+          "--card-neon": `var(${neonOf(item.accent)})`,
+        } as CSSProperties
+      }
     >
       <div className={s.inner}>
         {/* --------------------------------------------------------- front */}

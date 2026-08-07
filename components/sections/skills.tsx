@@ -57,11 +57,11 @@ const colX = (i: number) => (i + 0.5) * COL_W
 const rowY = (r: number) => TOP + (r + 0.5) * ROW_H
 
 const HUE: Record<SkillCategory, string> = {
-  "AI/ML": "#a78bfa",
-  Data: "#7dd3fc",
-  Backend: "#34d399",
-  Frontend: "#60a5fa",
-  Tools: "#f0b429",
+  "AI/ML": "var(--accent-violet)",
+  Data: "var(--accent-cyan)",
+  Backend: "var(--accent-emerald)",
+  Frontend: "var(--accent-blue)",
+  Tools: "var(--accent-amber)",
 }
 
 const DEPTH: Record<Skill["weight"], string> = {

@@ -61,7 +61,7 @@
 }
 
 [data-theme="light"] .trace[data-gold="true"] {
-  stroke: rgba(154, 118, 21, 0.3);
+  stroke: rgba(194, 0, 95, 0.28);
 }
 
 [data-theme="light"] .pulse {
@@ -70,8 +70,8 @@
 }
 
 [data-theme="light"] .pulse[data-gold="true"] {
-  stroke: #9a7615;
-  filter: drop-shadow(0 0 6px rgba(154, 118, 21, 0.5));
+  stroke: #c2005f;
+  filter: drop-shadow(0 0 6px rgba(194, 0, 95, 0.5));
 }
 
 /* The emissive lift the hero adds is far less visible against a light ground,

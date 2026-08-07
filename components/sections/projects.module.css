@@ -86,7 +86,7 @@
 }
 
 .bracket {
-  color: var(--color-edge);
+  color: var(--color-faint);
   transition: color 0.25s ease;
 }
 
@@ -307,7 +307,7 @@
 }
 
 .arrow {
-  color: color-mix(in oklab, var(--card-accent, var(--accent-cyan)) 65%, transparent);
+  color: var(--card-accent, var(--accent-cyan));
   font-size: 0.7rem;
 }
 
@@ -600,4 +600,13 @@
   .slot {
     transform: translateX(calc(var(--d) * var(--step))) scale(calc(1 - var(--ad) * 0.05));
   }
+}
+
+/* The neon tier is for display type only. This title is 20–22px, below the
+   large-text threshold, so it is judged at 4.5:1 — and nothing that still looks
+   like neon clears 4.5:1 on white. It takes the accent instead. The element
+   selector is load-bearing: it outranks the `[data-theme] .inlay` rule that
+   would otherwise set --lit from source order alone. */
+[data-theme="light"] h3.title {
+  --lit: var(--card-accent);
 }

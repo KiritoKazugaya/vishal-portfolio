@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from "react"
 import { LAYERS, layerIndex } from "@/lib/chip-config"
+import { neonOf } from "@/lib/theme"
 import type { LayerId } from "@/lib/types"
 
 interface Props {
@@ -20,7 +21,10 @@ interface Props {
  */
 export function Chapter({ id, title, lead, children, bare = false }: Props) {
   const def = LAYERS[layerIndex(id)]
-  const style = { "--card-accent": `var(${def.cssAccent})` } as CSSProperties
+  const style = {
+    "--card-accent": `var(${def.cssAccent})`,
+    "--card-neon": `var(${neonOf(def.cssAccent)})`,
+  } as CSSProperties
 
   return (
     <section

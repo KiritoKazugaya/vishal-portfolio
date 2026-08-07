@@ -36,6 +36,27 @@
   --accent-violet: #a78bfa;
   --accent-emerald: #34d399;
   --accent-amber: #f0b429;
+  /* Frontend's hue in the Skills graph. It has no chip layer, so it lives here
+     rather than in chip-config. */
+  --accent-blue: #60a5fa;
+
+  /* On black the accents are already luminous, so display and functional use
+     can share them. The two tiers only diverge on a light ground. */
+  --neon-cyan: var(--accent-cyan);
+  --neon-gold: var(--accent-gold);
+  --neon-violet: var(--accent-violet);
+  --neon-emerald: var(--accent-emerald);
+  --neon-amber: var(--accent-amber);
+  --neon-blue: var(--accent-blue);
+
+  /*
+   * Which way an accent has to be pushed to stay legible as text.
+   *
+   * `color-mix(accent 70%, var(--tint))` appears all over the components: on
+   * black the accent needs lifting toward white, on white it needs deepening
+   * toward black. Same declaration, opposite direction, one token.
+   */
+  --tint: #ffffff;
 
   /* Gutter scales with the viewport, from a 320px phone to a wall display. */
   --gutter: clamp(1rem, 4vw, 4rem);
@@ -79,68 +100,129 @@
   --color-faint: #5c6474;
   --color-label: #4b5365;
 
+  --tint: #000000;
+
+  /*
+   * Gold does not survive the trip to a light ground — see the neon note below.
+   * The Skills layer becomes magenta in both tiers here, deep enough to carry
+   * small text at 6.1:1 in the accent and vivid in the neon.
+   */
   --color-cyan: #0a7189;
-  --color-gold: #9a7615;
+  --color-gold: #c2005f;
   --color-violet: #7b3fe4;
-  --color-emerald: #0a8f63;
-  --color-amber: #c2620a;
+  --color-emerald: #0a7d57;
+  --color-amber: #a85305;
 
   --accent-cyan: #0a7189;
-  --accent-gold: #9a7615;
+  --accent-gold: #c2005f;
   --accent-violet: #7b3fe4;
-  --accent-emerald: #0a8f63;
-  --accent-amber: #c2620a;
+  --accent-emerald: #0a7d57;
+  --accent-amber: #a85305;
+  --accent-blue: #1d63c9;
 
-  /* Engraved gold has to invert its logic on a light ground: the bright bands
-     now read as the polish and the dark bands carry the letterform, so the
-     whole ramp drops several stops or the glyphs vanish into the page. */
-  --metal-gold: linear-gradient(
-    176deg,
-    #6b5016 0%,
-    #a8842c 8%,
-    #d9bd6e 17%,
-    #8a6a1f 31%,
-    #5c4512 47%,
-    #c2a047 63%,
-    #7d5f22 79%,
-    #4d3b11 100%
-  );
-  --metal-sheen: linear-gradient(
-    100deg,
-    transparent 38%,
-    rgba(255, 255, 255, 0.5) 50%,
-    transparent 62%
-  );
+  /*
+   * The neon tier. Vivid, and only ever used on display type and card rims —
+   * things that are large or decorative, where the bar is 3:1 rather than 4.5.
+   * Small text keeps the accents above.
+   *
+   * Gold has no neon form. Every attempt at it on white lands somewhere between
+   * mustard and brown, because what sells gold is specular contrast and there is
+   * none to be had against a light ground. The Skills layer takes magenta here
+   * instead — it is the one hue the other four leave unclaimed.
+   *
+   * Note this is the one accent whose light value is not a darkening of its dark
+   * value but a different hue entirely, so `var(--accent-gold)` sites elsewhere
+   * in the app re-ink to magenta with no per-site override.
+   */
+  --neon-cyan: #0096bd;
+  --neon-gold: #e6007e;
+  --neon-violet: #8b2fe8;
+  --neon-emerald: #009a58;
+  --neon-amber: #f04f00;
+  --neon-blue: #0080ff;
+
 }
 
-/* Frosted white rather than tinted black. */
+/*
+ * Neon letters, not engraved metal.
+ *
+ * Engraving is a dark-ground effect: it works because a bright bevel and a black
+ * shadow can sit either side of the same stroke. On white there is no shadow to
+ * cut into, so the metal ramp just read as brown.
+ *
+ * The neon version keeps the same gradient machinery but inverts the intent —
+ * a lit core with the hue deepening toward the baseline, and the glow moved off
+ * the letterform into a coloured halo. Each heading takes its own layer's neon
+ * through --card-neon, so the type carries the same colour as the card it sits
+ * on rather than one global accent.
+ */
+[data-theme="light"] .inlay,
+[data-theme="light"] .inlay-soft {
+  --lit: var(--card-neon, var(--neon-violet));
+
+  /* Nearly flat on purpose. A wide ramp reads as a bevel, and a bevel is the
+     dark-ground effect this is replacing; a neon tube is one colour with a
+     faint sheen off the top edge. It also keeps the lightest part of the glyph
+     within reach of the pure hue rather than 30% of the way to white. */
+  background-image: linear-gradient(
+    176deg,
+    color-mix(in oklab, var(--lit) 92%, #ffffff) 0%,
+    var(--lit) 26%,
+    color-mix(in oklab, var(--lit) 88%, #000000) 74%,
+    color-mix(in oklab, var(--lit) 72%, #000000) 100%
+  );
+  background-size: 100% 100%;
+  background-position: 0 0;
+  /* The sweep is a polish cue. Neon does not polish, so it goes. */
+  animation: none;
+  filter:
+    drop-shadow(0 1px 0 rgba(255, 255, 255, 0.85))
+    drop-shadow(0 0 14px color-mix(in oklab, var(--lit) 34%, transparent));
+}
+
+/*
+ * Solid neon cards.
+ *
+ * On black a card is defined by being lighter than its surroundings. On white
+ * it has nothing to be lighter than, so the definition has to come from the
+ * edge instead: a full neon border rather than a gradient rim that fades out on
+ * two sides, a coloured halo carrying the same hue outward, and a tinted wash
+ * across the face so the colour reads on the surface and not only at its
+ * boundary.
+ */
 [data-theme="light"] .glass {
+  --lit: var(--card-neon, var(--neon-violet));
+
   background:
     linear-gradient(
       158deg,
-      rgba(255, 255, 255, 0.94) 0%,
-      rgba(255, 255, 255, 0.62) 42%,
-      rgba(255, 255, 255, 0.88) 100%
+      rgba(255, 255, 255, 0.96) 0%,
+      rgba(255, 255, 255, 0.72) 46%,
+      color-mix(in oklab, var(--lit) 7%, rgba(255, 255, 255, 0.9)) 100%
     ),
-    rgba(255, 255, 255, 0.72);
-  border-color: rgba(11, 14, 20, 0.08);
+    #ffffff;
+  border-color: color-mix(in oklab, var(--lit) 55%, transparent);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 1),
-    inset 0 -1px 0 rgba(11, 14, 20, 0.06),
-    0 20px 44px -26px rgba(11, 14, 20, 0.4);
+    0 0 0 1px color-mix(in oklab, var(--lit) 16%, transparent),
+    0 14px 30px -18px color-mix(in oklab, var(--lit) 40%, transparent),
+    0 22px 48px -28px rgba(11, 14, 20, 0.45);
 }
 
-/* The rim IS the neon here — on white it wants more presence, not less. */
+/* The gradient rim is a dark-ground trick — it works by catching light on two
+   corners. Against a solid neon border it just muddies it, so it goes. */
 [data-theme="light"] .glass::after {
-  opacity: 0.95;
+  opacity: 0;
 }
 
 [data-theme="light"] .glass-lift:hover,
 [data-theme="light"] .glass-lift:focus-visible {
+  border-color: color-mix(in oklab, var(--lit) 85%, transparent);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 1),
-    0 30px 56px -26px rgba(11, 14, 20, 0.45),
-    0 0 0 1px color-mix(in oklab, var(--card-accent, var(--accent-cyan)) 45%, transparent);
+    0 0 0 1px color-mix(in oklab, var(--lit) 30%, transparent),
+    0 18px 38px -16px color-mix(in oklab, var(--lit) 55%, transparent),
+    0 30px 56px -26px rgba(11, 14, 20, 0.4);
 }
 
 [data-theme="light"] .chapter-scrim::before {
@@ -170,6 +252,16 @@
 [data-theme="light"] .terminal {
   border-color: rgba(11, 14, 20, 0.16);
   box-shadow: 0 20px 44px -26px rgba(11, 14, 20, 0.5);
+
+  /* And because it stays dark, it keeps the dark palette. The light accents are
+     tuned against white; on near-black they drop under 3:1. */
+  --tint: #ffffff;
+  --accent-cyan: #7dd3fc;
+  --accent-gold: #c7a24a;
+  --accent-violet: #a78bfa;
+  --accent-emerald: #34d399;
+  --accent-amber: #f0b429;
+  --accent-blue: #60a5fa;
 }
 
 [data-theme="light"] ::selection {
@@ -513,7 +605,7 @@ body {
 }
 
 .mark:hover {
-  color: color-mix(in oklab, var(--card-accent, var(--accent-cyan)) 80%, #fff);
+  color: color-mix(in oklab, var(--card-accent, var(--accent-cyan)) 80%, var(--tint));
 }
 
 .mark:hover::after {

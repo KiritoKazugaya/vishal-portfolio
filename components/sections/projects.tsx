@@ -9,6 +9,7 @@ import { ArrowLeft, ArrowRight, ExternalLink, GitBranch, Lock } from "lucide-rea
 import { Chapter } from "@/components/ui/chapter"
 import { setScrollLock } from "@/hooks/use-chip-timeline"
 import { projectCategories, projects } from "@/lib/data"
+import { neonOf } from "@/lib/theme"
 import type { Project, ProjectCategory } from "@/lib/types"
 import s from "./projects.module.css"
 
@@ -192,7 +193,7 @@ export function Projects() {
           <div className="mt-4 flex items-center justify-between gap-4">
             <p className="font-mono text-[0.68rem] text-faint">
               {reduced ? "auto-advance off" : paused ? "paused" : "auto-advancing"}
-              <span className="text-edge"> · </span>
+              <span className="text-faint"> · </span>
               {active + 1}/{n}
             </p>
             <div className="flex gap-2">
@@ -299,7 +300,10 @@ function Card({
   onActivate: () => void
 }) {
   const accent = `var(${project.accent})`
-  const style = { "--card-accent": accent } as CSSProperties
+  const style = {
+    "--card-accent": accent,
+    "--card-neon": `var(${neonOf(project.accent)})`,
+  } as CSSProperties
   const langs = project.languages
 
   return (
@@ -463,7 +467,10 @@ function Detail({
   const closeRef = useRef<HTMLButtonElement>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
   const accent = `var(${project.accent})`
-  const style = { "--card-accent": accent } as CSSProperties
+  const style = {
+    "--card-accent": accent,
+    "--card-neon": `var(${neonOf(project.accent)})`,
+  } as CSSProperties
   const hasAssumed = project.metrics.some((m) => m.assumed)
 
   const onKey = useCallback(

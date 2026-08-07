@@ -1,5 +1,17 @@
 export type Theme = "dark" | "light"
 
+/**
+ * `--accent-*` -> `--neon-*`.
+ *
+ * Two tiers exist because one cannot do both jobs on a light ground: the accent
+ * is tuned to clear AA when it carries small text, and the neon is tuned to look
+ * like neon. Display type and card rims take the neon, everything functional
+ * keeps the accent. Deriving the name here means no data file has to carry both.
+ */
+export function neonOf(accentToken: string) {
+  return accentToken.replace("--accent-", "--neon-")
+}
+
 const KEY = "theme"
 const listeners = new Set<() => void>()
 
