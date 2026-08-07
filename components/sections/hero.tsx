@@ -15,41 +15,40 @@ export function Hero() {
   return (
     <section id="hero" aria-label="Introduction" className="relative h-[400vh]">
       {/* Bottom padding is tighter than the top so the scroll cue sits low in frame. */}
-      <div className="sticky top-0 flex h-screen w-full flex-col justify-between overflow-hidden pt-24 pb-[clamp(1.5rem,4vh,2.75rem)] md:pt-28">
-      {/* Name left, actions right. With the nav held back through the hero
-          there is nothing in the top-right, and putting the résumé button there
-          means the corner does not move when the nav later drops in. */}
-      <div data-hero-copy className="shell">
-        <div className="flex flex-col gap-[clamp(1.25rem,2.5vw,2rem)] md:flex-row md:items-start md:justify-between">
-          <div className="min-w-0">
-            <p className="eyebrow mb-[clamp(0.75rem,1.4vw,1.25rem)]">
-              {profile.role} · {profile.location}
-            </p>
-            {/* Gold inlay clips at the glyph baseline, so the line box gets room to spare. */}
-            {/* 6.6vw rather than 7.6: the actions now take ~280px out of this
-                row, and at the larger size the name broke to three lines in the
-                middle of the range. */}
-            <h1 className="inlay max-w-[15ch] pb-[0.08em] text-[clamp(2.35rem,6.6vw,6rem)] font-bold leading-[0.95] tracking-[-0.03em]">
-              {profile.name}
-            </h1>
-          </div>
-
-          <div className="flex shrink-0 flex-wrap items-center gap-3 md:pt-[0.15rem]">
-            <a
-              href="#package"
-              className="rounded-full bg-chalk px-[clamp(1.1rem,1.6vw,1.6rem)] py-[clamp(0.6rem,0.9vw,0.8rem)] text-[clamp(0.82rem,0.95vw,0.95rem)] font-semibold text-void transition-transform hover:scale-[1.03]"
-            >
-              View work
-            </a>
-            <a
-              href={contact.resume}
-              download
-              className="rounded-full border border-edge px-[clamp(1.1rem,1.6vw,1.6rem)] py-[clamp(0.6rem,0.9vw,0.8rem)] text-[clamp(0.82rem,0.95vw,0.95rem)] font-semibold text-chalk transition-colors hover:border-cyan hover:text-cyan"
-            >
-              Download résumé
-            </a>
-          </div>
+      <div className="sticky top-0 flex h-screen w-full flex-col justify-between overflow-hidden pt-[7rem] pb-[clamp(1.5rem,4vh,2.75rem)] md:pt-[9rem]">
+      {/*
+        Actions sit where the navigation will be: same vertical offset (py-5),
+        same .shell, centred like the nav's own link row. Absolutely positioned
+        so it does not join the panel's justify-between distribution — the name
+        and the closing block keep the top and bottom of the frame to themselves.
+      */}
+      <div data-hero-copy className="absolute inset-x-0 top-0 z-10">
+        <div className="shell flex flex-wrap items-center justify-center gap-3 py-5">
+          <a
+            href="#package"
+            className="rounded-full bg-chalk px-[clamp(1.1rem,1.6vw,1.6rem)] py-[clamp(0.6rem,0.9vw,0.8rem)] text-[clamp(0.82rem,0.95vw,0.95rem)] font-semibold text-void transition-transform hover:scale-[1.03]"
+          >
+            View work
+          </a>
+          <a
+            href={contact.resume}
+            download
+            className="rounded-full border border-edge px-[clamp(1.1rem,1.6vw,1.6rem)] py-[clamp(0.6rem,0.9vw,0.8rem)] text-[clamp(0.82rem,0.95vw,0.95rem)] font-semibold text-chalk transition-colors hover:border-cyan hover:text-cyan"
+          >
+            Download résumé
+          </a>
         </div>
+      </div>
+
+      <div data-hero-copy className="shell">
+        <p className="eyebrow mb-[clamp(0.75rem,1.4vw,1.25rem)]">
+          {profile.role} · {profile.location}
+        </p>
+        {/* Gold inlay clips at the glyph baseline, so the line box gets room to
+            spare. Back to 7.6vw now the actions have left this row. */}
+        <h1 className="inlay max-w-[15ch] pb-[0.08em] text-[clamp(2.35rem,7.6vw,6rem)] font-bold leading-[0.95] tracking-[-0.03em]">
+          {profile.name}
+        </h1>
       </div>
 
       <div data-hero-copy className="shell">
