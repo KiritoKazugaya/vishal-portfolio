@@ -105,20 +105,34 @@
 
 /* ------------------------------------------------------------------- chip */
 
+/*
+ * Sized in vh, not as a share of the stage, because the target it has to match
+ * is sized in vh too — see below. The vw term is a rail for absurd aspect
+ * ratios only; at 64vw it was clipping the match on tall phones by up to 4%,
+ * and on those screens the hero chip really is that wide, so matching it is
+ * the correct behaviour rather than something to guard against.
+ */
 .chip {
   position: relative;
-  width: 46%;
+  width: min(30vh, 72vw);
   aspect-ratio: 1;
   transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /*
- * The hand-off: the plate settles to roughly the size and place the hero chip
- * occupies at scroll zero, so the WebGL chip appears to be the same object
- * continuing rather than a second one replacing it.
+ * The hand-off.
+ *
+ * At hero progress 0 the camera sits 12.6 world units above the assembled
+ * package with a 38deg vertical FOV, so the visible height at the chip plane is
+ * 2 * tan(19deg) * 12.6 = 8.68 units. The top layer is 4.0 units across, which
+ * puts the hero chip at 4.0 / 8.68 = 46.1% of the viewport HEIGHT — not width,
+ * which is why this is expressed in vh and not as a fraction of the stage.
+ *
+ * 30vh * 1.537 = 46.1vh. Change the camera keyframe, the FOV or the layer size
+ * and this number has to be recomputed with it.
  */
 .root[data-done="true"] .chip {
-  transform: scale(0.72) translateY(2%);
+  transform: scale(1.537);
 }
 
 .chipImg {
