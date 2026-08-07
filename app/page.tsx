@@ -17,7 +17,7 @@ export default function Home() {
       <Nav />
       <LayerRail />
 
-      <main id="main">
+      <main id="main" className="page-inset">
         <Hero />
 
         {/* Chapters begin once the package has separated. Each maps to a slab. */}

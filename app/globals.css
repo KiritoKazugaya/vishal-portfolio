@@ -39,6 +39,12 @@
   --gutter: clamp(1rem, 4vw, 4rem);
   /* Nav and content share this, so their left/right edges align exactly. */
   --shell-max: min(100rem, 100% - var(--gutter) * 2);
+  /*
+   * Space reserved for the fixed chapter rail. Zero until the rail actually
+   * appears at 1024px — below that it is display:none and the content should
+   * use the full width.
+   */
+  --rail-space: 0px;
 
   color-scheme: dark;
 }
@@ -87,6 +93,23 @@ body {
 .shell {
   width: var(--shell-max);
   margin-inline: auto;
+}
+
+/*
+ * The chapter rail is `position: fixed`, so it takes no space in flow and was
+ * sitting on top of the content — 151px of overlap at 1280. Reserving the space
+ * here rather than nudging each section keeps the nav and every chapter on the
+ * same left edge, and the shell still centres itself inside what is left.
+ */
+.page-inset {
+  padding-inline-start: var(--rail-space);
+}
+
+@media (min-width: 1024px) {
+  :root {
+    /* Rail is 192px wide at 10px from the edge; this clears it with a margin. */
+    --rail-space: 14rem;
+  }
 }
 
 /* -------------------------------------------------------------------------- */

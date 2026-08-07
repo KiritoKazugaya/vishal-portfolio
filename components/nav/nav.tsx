@@ -16,7 +16,7 @@ export function Nav() {
   const active = useActiveLayer()
 
   return (
-    <header className="fixed inset-x-0 top-0 z-40">
+    <header className="page-inset fixed inset-x-0 top-0 z-40">
       <nav
         aria-label="Primary"
         className="shell flex items-center justify-between gap-6 py-5"
