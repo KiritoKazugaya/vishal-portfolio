@@ -11,12 +11,14 @@ export function About() {
         className="glass overflow-hidden p-[clamp(1.25rem,2.4vw,2.25rem)]"
       >
         <div className="flex flex-col gap-7 sm:flex-row sm:items-start">
+          {/* Source is 1282x1600, so 576 covers the 288px ceiling at 2x DPR. */}
           <Image
             src={profile.photo}
             alt={profile.photoAlt}
-            width={168}
-            height={168}
-            className="h-[clamp(5.5rem,9vw,9rem)] w-[clamp(5.5rem,9vw,9rem)] shrink-0 rounded-2xl object-cover object-top ring-1 ring-white/10"
+            width={576}
+            height={576}
+            sizes="(min-width: 1024px) 288px, (min-width: 640px) 18vw, 176px"
+            className="h-[clamp(11rem,18vw,18rem)] w-[clamp(11rem,18vw,18rem)] shrink-0 rounded-2xl object-cover object-top ring-1 ring-white/10"
           />
           <div className="space-y-4">
             <p className="body-lead">{profile.summary}</p>
