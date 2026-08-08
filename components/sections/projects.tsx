@@ -2,8 +2,7 @@
 
 import type { CSSProperties } from "react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { createPortal } from "react-dom"
-import { AnimatePresence, motion, useReducedMotion } from "motion/react"
+import { useReducedMotion } from "motion/react"
 import { ArrowLeft, ArrowRight, ExternalLink, GitBranch, Lock } from "lucide-react"
 
 import { Chapter } from "@/components/ui/chapter"
@@ -25,6 +24,17 @@ export function Projects() {
   const [held, setHeld] = useState(false)
   const reduced = useReducedMotion()
   const stageRef = useRef<HTMLDivElement>(null)
+  const sheetRef = useRef<HTMLDialogElement>(null)
+
+  /* Lags `open` by one close, so the dialog still has a case study to render
+     while it transitions out. Recorded when opening rather than derived in an
+     effect - an effect would set state from state, which is a render the user
+     pays for and React rightly flags. */
+  const [lastOpen, setLastOpen] = useState(0)
+  const openAt = useCallback((i: number) => {
+    setOpen(i)
+    setLastOpen(i)
+  }, [])
 
   const visible = useMemo(
     () => (filter ? projects.filter((p) => p.category === filter) : projects),
@@ -38,6 +48,12 @@ export function Projects() {
   }, [])
 
   const n = visible.length
+
+  /* What the dialog renders: the open project, or the last one while it closes.
+     Indexed into `visible`, so a filter change that shortens the list resolves
+     to null rather than to the wrong case study. */
+  const shownIndex = open ?? lastOpen
+  const shownProject = visible[shownIndex] ?? null
 
   const go = useCallback(
     (dir: 1 | -1) => setActive((a) => (a + dir + n) % n),
@@ -64,10 +80,10 @@ export function Projects() {
   /*
    * The page freeze lives here, not in the modal.
    *
-   * AnimatePresence keeps the dialog mounted through its exit animation, so
-   * tying the lock to the modal's own unmount makes releasing it depend on that
-   * animation completing. If it ever does not, the page stays frozen with
-   * nothing on screen to explain why. Keyed on `open`, it cannot be stranded.
+   * The dialog stays mounted across its exit transition, so tying the lock to
+   * the modal's own unmount would make releasing it depend on that transition
+   * completing. If it ever did not, the page would stay frozen with nothing on
+   * screen to explain why. Keyed on `open`, it cannot be stranded.
    */
   useEffect(() => {
     const locked = open !== null
@@ -77,6 +93,45 @@ export function Projects() {
       setScrollLock(false)
       document.body.style.overflow = ""
     }
+  }, [open])
+
+  useEffect(() => {
+    const d = sheetRef.current
+    if (!d) return
+    if (open !== null && !d.open) d.showModal()
+    else if (open === null && d.open) d.close()
+  }, [open])
+
+  /*
+   * Escape is intercepted at `cancel`, not observed at `close`.
+   *
+   * `close` does not bubble and is dispatched as a queued task, so state derived
+   * from it can arrive late or not at all — and what rides on it here is the
+   * scroll lock, which would leave the page frozen with nothing on screen.
+   * `cancel` fires synchronously on the keydown and is cancelable, so preventing
+   * it and routing through state keeps React the single writer. Both listeners
+   * are native because neither event reaches React's delegated root.
+   */
+  useEffect(() => {
+    const d = sheetRef.current
+    if (!d) return
+    const cancel = (e: Event) => {
+      e.preventDefault()
+      setOpen(null)
+    }
+    const close = () => setOpen(null)
+    d.addEventListener("cancel", cancel)
+    d.addEventListener("close", close)
+    return () => {
+      d.removeEventListener("cancel", cancel)
+      d.removeEventListener("close", close)
+    }
+  }, [])
+
+  /* Stepping to another case study starts it at the top. The dialog is the
+     scroller now, so this moved up here with it. */
+  useEffect(() => {
+    if (open !== null) sheetRef.current?.scrollTo({ top: 0 })
   }, [open])
 
   const paused = held || open !== null || !!reduced
@@ -182,7 +237,7 @@ export function Projects() {
                     <Card
                       project={p}
                       centre={centre}
-                      onActivate={() => (centre ? setOpen(i) : setActive(i))}
+                      onActivate={() => (centre ? openAt(i) : setActive(i))}
                     />
                   </div>
                 )
@@ -208,23 +263,50 @@ export function Projects() {
         </div>
       </div>
 
-      <AnimatePresence>
-        {open !== null && visible[open] ? (
+      {/*
+        A native <dialog>, opened with showModal().
+
+        It replaces a hand-rolled overlay that had the dialog semantics right and
+        the behaviour wrong: nothing intercepted Tab, so Shift+Tab from Close
+        walked out into the page behind, and on close focus fell to <body> — a
+        keyboard reader who opened the seventh case study was returned to the top
+        of a five-chapter page. showModal() supplies the focus trap, focus
+        restore, Escape and background inert-ing in one move, and the top layer
+        retires the stacking problem that needed createPortal here before.
+
+        Always mounted, and it keeps rendering the last project after close, so
+        the exit transition has something to fade rather than emptying first. A
+        closed dialog is display:none, so that content is out of the tab order
+        and the accessibility tree.
+      */}
+      <dialog
+        ref={sheetRef}
+        aria-labelledby="case-title"
+        className={s.caseDialog}
+        data-lenis-prevent
+        /* Every pixel of the dialog outside the card is backdrop. The card and
+           the steppers are children, so they report themselves as the target and
+           never reach this. */
+        onClick={(e) => {
+          if (e.target === sheetRef.current) setOpen(null)
+        }}
+      >
+        {shownProject ? (
           <Detail
-            project={visible[open]}
-            index={open}
+            project={shownProject}
+            index={shownIndex}
             total={n}
             onClose={() => setOpen(null)}
             /* Stepping in the modal also moves the arc, so closing lands the
                reader on the project they were last reading. */
             onStep={(dir) => {
-              const next = (open + dir + n) % n
-              setOpen(next)
+              const next = (shownIndex + dir + n) % n
+              openAt(next)
               setActive(next)
             }}
           />
         ) : null}
-      </AnimatePresence>
+      </dialog>
     </Chapter>
   )
 }
@@ -464,8 +546,6 @@ function Detail({
   onClose: () => void
   onStep: (dir: 1 | -1) => void
 }) {
-  const closeRef = useRef<HTMLButtonElement>(null)
-  const scrollRef = useRef<HTMLDivElement>(null)
   const accent = `var(${project.accent})`
   const style = {
     "--card-accent": accent,
@@ -473,55 +553,22 @@ function Detail({
   } as CSSProperties
   const hasAssumed = project.metrics.some((m) => m.assumed)
 
-  const onKey = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose()
-    },
-    [onClose],
-  )
-
-  // The page freeze is owned by the parent, keyed on which project is open.
-  useEffect(() => {
-    document.addEventListener("keydown", onKey)
-    closeRef.current?.focus()
-    return () => document.removeEventListener("keydown", onKey)
-  }, [onKey])
-
-  // Stepping to another project starts that case study at the top.
-  useEffect(() => {
-    scrollRef.current?.scrollTo({ top: 0 })
-  }, [index])
-
   /*
-   * Portalled to <body>.
+   * No portal, no overlay div, no keydown listener, no focus call.
    *
-   * `.chapter-scrim` sets `isolation: isolate`, which creates a stacking
-   * context — so a z-50 dialog rendered inside it is only z-50 *within that
-   * section*, and the fixed z-40 navigation still painted over the top of it.
-   * Escaping to the body root is what actually puts the dialog above the page.
+   * All four were standing in for a modal dialog and doing it partially. The
+   * parent's <dialog> owns them now: the top layer replaces createPortal, the
+   * ::backdrop replaces the scrim, showModal() replaces the Escape handler and
+   * the manual focus, and it adds the two things this never had — a focus trap
+   * and focus restore.
    */
-  return createPortal(
-    <motion.div
-      ref={scrollRef}
-      /* Lenis must keep its hands off this scroller, or the wheel goes to the
-         page it is supposed to be holding still. */
-      data-lenis-prevent
-      className="fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto overscroll-contain bg-void/90 p-4 backdrop-blur-md md:p-8"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.2 }}
-      onClick={onClose}
-      role="presentation"
-    >
+  return (
+    <>
       {/* Lightbox-style steppers, so a reader moves through the case studies
           without returning to the carousel between each one. */}
       <button
         type="button"
-        onClick={(e) => {
-          e.stopPropagation()
-          onStep(-1)
-        }}
+        onClick={() => onStep(-1)}
         aria-label="Previous case study"
         className={s.sideArrow}
         data-side="left"
@@ -530,10 +577,7 @@ function Detail({
       </button>
       <button
         type="button"
-        onClick={(e) => {
-          e.stopPropagation()
-          onStep(1)
-        }}
+        onClick={() => onStep(1)}
         aria-label="Next case study"
         className={s.sideArrow}
         data-side="right"
@@ -541,17 +585,9 @@ function Detail({
         <ArrowRight className="h-5 w-5" aria-hidden />
       </button>
 
-      <motion.article
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="case-title"
+      <article
         style={style}
-        onClick={(e) => e.stopPropagation()}
-        initial={{ opacity: 0, y: 24, scale: 0.985 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 16, scale: 0.99 }}
-        transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-        className="glass relative my-auto w-full max-w-3xl px-5 pb-5 sm:px-6 sm:pb-6 md:px-10 md:pb-10"
+        className={`glass relative my-auto w-full max-w-3xl px-5 pb-5 sm:px-6 sm:pb-6 md:px-10 md:pb-10 ${s.caseCard}`}
       >
         {/* Sticky, so stepping and closing stay reachable however far down the
             case study the reader has scrolled. */}
@@ -579,7 +615,6 @@ function Detail({
               <ArrowRight className="h-4 w-4" aria-hidden />
             </button>
             <button
-              ref={closeRef}
               type="button"
               onClick={onClose}
               className={s.barClose}
@@ -741,9 +776,8 @@ function Detail({
             ) : null}
           </div>
         ) : null}
-      </motion.article>
-    </motion.div>,
-    document.body,
+      </article>
+    </>
   )
 }
 

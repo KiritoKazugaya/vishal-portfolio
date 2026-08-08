@@ -610,3 +610,93 @@
 [data-theme="light"] h3.title {
   --lit: var(--card-accent);
 }
+
+/* -------------------------------------------------------------------------- */
+/*  Case study dialog                                                          */
+/*                                                                             */
+/*  Was a portalled div with Framer enter/exit; it is a native <dialog> opened  */
+/*  with showModal() now, so the transitions move to CSS. The dialog IS the     */
+/*  scrim and the scroller - a click landing on it, rather than on a child, is  */
+/*  by definition a click outside the card, which is what the close handler     */
+/*  keys on.                                                                    */
+/* -------------------------------------------------------------------------- */
+
+.caseDialog {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  margin: 0;
+  border: 0;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 1rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: color-mix(in oklab, var(--color-void) 90%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: inherit;
+  opacity: 0;
+  /* NEVER set `display` outside an [open] selector: the UA's
+     `dialog:not([open]) { display: none }` is the only thing hiding this, and an
+     author declaration would beat it and leave the dialog permanently on top. */
+  transition:
+    opacity 0.2s ease,
+    overlay 0.28s allow-discrete,
+    display 0.28s allow-discrete;
+}
+
+@media (min-width: 48rem) {
+  .caseDialog {
+    padding: 2rem;
+  }
+}
+
+/* `display` belongs here and ONLY here. On the base rule it beat the UA's
+   `dialog:not([open]) { display: none }` - the one declaration keeping a closed
+   dialog off the page - and the closed dialog kept laying out over the section.
+   Under [open] the closed state falls back to the UA rule, and the
+   allow-discrete transition above defers the flip to the end of the fade. */
+.caseDialog[open] {
+  display: flex;
+  opacity: 1;
+}
+
+@starting-style {
+  .caseDialog[open] {
+    opacity: 0;
+  }
+}
+
+/* The card's own rise. Keyed off the dialog's [open] rather than its own
+   mount, because it never unmounts - it stays rendered through the close so the
+   transition has something to fade instead of emptying first. */
+.caseCard {
+  opacity: 0;
+  transform: translateY(24px) scale(0.985);
+  transition:
+    opacity 0.28s ease,
+    transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.caseDialog[open] .caseCard {
+  opacity: 1;
+  transform: none;
+}
+
+@starting-style {
+  .caseDialog[open] .caseCard {
+    opacity: 0;
+    transform: translateY(24px) scale(0.985);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caseDialog,
+  .caseCard {
+    transition: none;
+  }
+}

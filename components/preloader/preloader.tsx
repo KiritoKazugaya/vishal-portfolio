@@ -81,7 +81,13 @@ export function Preloader() {
     if (done) return
     const prev = document.body.style.overflow
     document.body.style.overflow = "hidden"
-    window.scrollTo(0, 0)
+    /* Guarded, not removed. Unconditional, it defeated deep links — /#projects
+       landed at the top of the page. But dropping it outright lets the browser
+       restore a mid-page scroll position under an opaque overlay while
+       ScrollTrigger is still measuring, which calibrates the hero timeline
+       against a viewport it never saw. Reset only when there is no hash to
+       honour. */
+    if (!window.location.hash) window.scrollTo(0, 0)
     return () => {
       document.body.style.overflow = prev
     }

@@ -4,7 +4,7 @@ import { Suspense, useEffect, useMemo } from "react"
 import { Canvas } from "@react-three/fiber"
 import Image from "next/image"
 
-import { chipState } from "@/lib/scroll-store"
+import { chipState, setSceneReady } from "@/lib/scroll-store"
 import { useCoarsePointer, useMounted, useReducedMotion } from "@/hooks/use-reduced-motion"
 import { useTheme } from "@/hooks/use-theme"
 import { ChipScene } from "./chip-scene"
@@ -82,6 +82,26 @@ export function ChipCanvas() {
     if (!mounted || reduced || !webgl) return
     const id = window.setTimeout(() => window.dispatchEvent(new Event("resize")), 260)
     return () => window.clearTimeout(id)
+  }, [mounted, reduced, webgl])
+
+  /*
+   * The static plate has to report itself ready, because nothing else will.
+   *
+   * ChipScene is the only caller of setSceneReady, and both fallback branches
+   * below return before it ever mounts. So for a visitor with reduced motion on,
+   * or one whose browser has no WebGL — locked-down corporate machines, which is
+   * to say a good share of recruiters — the flag stayed false forever and the
+   * preloader's only remaining exit was its six-second ceiling, held that whole
+   * time behind `body { overflow: hidden }`. Six seconds of frozen page for the
+   * two audiences least able to afford it.
+   *
+   * The plate is a single static image with nothing to wait on, so it signals
+   * immediately; the preloader's own MIN_MS floor still gives it time to paint.
+   */
+  useEffect(() => {
+    if (!mounted || (!reduced && webgl)) return
+    setSceneReady(true)
+    return () => setSceneReady(false)
   }, [mounted, reduced, webgl])
 
   if (!mounted) {

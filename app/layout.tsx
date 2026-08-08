@@ -18,7 +18,11 @@ const mono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://vishalakkala.vercel.app"),
+  /* The deployed host is vishal-akkala — with the hyphen. Without it every
+     absolute URL Next derives from this (the opengraph-image src below, above
+     all) points at a domain that 404s, which is worse for a scraper than
+     declaring nothing at all. */
+  metadataBase: new URL("https://vishal-akkala.vercel.app"),
   title: {
     default: `${profile.name} — ${profile.role}`,
     template: `%s — ${profile.name}`,
