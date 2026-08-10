@@ -40,11 +40,25 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-.vercel
-.env*
-
 # Playwright
 /test-results/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# local tooling — editor and assistant scratch, never part of the project
+.claude/
+.cursor/
+.windsurf/
+.aider*
+CLAUDE.md
+AGENTS.md
+.mcp.json
+
+# graphify — local knowledge-graph output
+graphify-out/
+.graphify/
+
+# scratch
+/tmp/
+*.local

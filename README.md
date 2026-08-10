@@ -1,90 +1,212 @@
-# Vishal Naveen Akkala — Portfolio
+# vishal-portfolio
 
-A scroll-driven portfolio built around a GPU package that powers on, rotates, and
-separates into five layers. Each layer is a chapter of the site.
+A personal portfolio built as a single scroll-driven scene: a GPU package that
+powers on, rotates, and separates into five slabs — each one a chapter of the
+site.
+
+**Live:** [vishal-akkala.vercel.app](https://vishal-akkala.vercel.app)
+
+---
+
+## The idea
+
+Most engineering portfolios are a list of sections stacked vertically. This one
+is a single object taken apart, because a GPU package is already a five-layer
+stack and the site already had five things to say. Scrolling doesn't move you
+past sections; it disassembles the chip, and each layer's gap is where a chapter
+lives.
+
+| Layer | Chapter |
+| --- | --- |
+| `package` — heat spreader | About |
+| `die` — silicon | Skills |
+| `interposer` | Projects |
+| `substrate` | Experience & education |
+| `contacts` — BGA array | Contact |
+
+The chip is one WebGL context fixed behind the whole page. It never scrolls. The
+page scrolls over it, and scroll position reaches the scene through a store
+rather than through React state — a re-render per frame would be a re-render per
+frame.
+
+---
+
+## Stack
+
+| | |
+| --- | --- |
+| **Framework** | Next.js 16 (App Router, Turbopack), React 19, TypeScript 5 |
+| **3D** | three.js, React Three Fiber, drei |
+| **Motion** | GSAP + ScrollTrigger (the chip timeline), Motion (component transitions), Lenis (smooth scroll) |
+| **Styling** | Tailwind CSS v4 (`@theme`, CSS-variable driven) + CSS Modules for anything stateful |
+| **Icons** | lucide-react |
+| **Testing** | Playwright |
+| **Hosting** | Vercel |
+
+Everything renders statically. There is no backend, no database and no client
+data fetching — the entire site is one prerendered route plus a WebGL scene.
+
+---
+
+## Architecture
+
+```
+app/
+  layout.tsx            root shell, metadata, pre-paint theme script
+  page.tsx              the single route — assembles preloader, canvas, nav, chapters
+  opengraph-image.png   1200×630 social card
+  error.tsx             route error boundary (keeps the résumé reachable)
+
+components/
+  chip/                 WebGL: canvas host, scene, per-layer slabs
+  circuit/              SVG conductors drawn behind the hero
+  nav/                  top bar, chapter rail, mobile sheet, theme toggle
+  preloader/            power-on sequence, gated on real scene readiness
+  sections/             the five chapters
+  ui/                   Chapter — the one wrapper every section shares
+
+hooks/
+  use-chip-timeline.ts  GSAP + Lenis wiring, scroll lock, scrollToLayer
+  use-active-layer.ts   subscriptions to the chip store
+  use-reduced-motion.ts motion / pointer / mount probes
+  use-theme.ts          theme subscription
+
+lib/
+  chip-config.ts        the five layers, their geometry, their accents
+  scroll-store.ts       mutable bridge between GSAP and the render loop
+  theme.ts              the single writer for light/dark
+  data.ts               all copy, projects, experience, skills
+```
+
+### The scroll timeline
+
+The hero owns 400vh of scroll and is **not** pinned. Pinning the document would
+break deep links, in-page find, and scroll restoration, so instead the hero is a
+400vh section with a `sticky` inner panel, scrubbed across four phases:
+
+| Phase | Range | What happens |
+| --- | --- | --- |
+| `power` | 0.00 – 0.20 | Circuits draw, contacts illuminate, chip flat and face-on |
+| `rotate` | 0.20 – 0.46 | Chip tilts to three-quarter view, camera dollies in |
+| `separate` | 0.46 – 0.82 | Slabs translate apart on the vertical axis |
+| `settle` | 0.82 – 1.00 | Stack settles into its reading position |
+
+After that the stack stays on screen as a fixed backdrop and each chapter lights
+its own layer as it passes the viewport centre.
+
+### The store
+
+`lib/scroll-store.ts` is a plain mutable object, not React state. GSAP writes to
+it every frame; the render loop reads it every frame; React subscribes only to
+the few values that actually change the DOM (active chapter, hero done, scene
+ready) via `useSyncExternalStore`. This is the single decision the whole
+animation layer rests on.
+
+### Theme
+
+`data-theme` on `<html>` is the source of truth, written by exactly one function.
+A pre-paint inline script resolves it before first render so the page never
+flashes. Two accent tiers exist because one cannot do both jobs on a light
+ground: `--accent-*` carries text and clears 4.5:1, `--neon-*` is display type
+and card rims at the 3:1 bar.
+
+---
+
+## Building it
+
+Roughly the order the work happened in.
+
+**1. Content before pixels.** The résumé, the project inventory, and an honest
+triage of what was worth showing. Metrics that are estimates are marked as
+estimates on the page — a `*` and a footnote — rather than quietly presented as
+measurements.
+
+**2. The scene.** One WebGL context, five textured slabs, the scroll timeline,
+and the store that connects them. This is where the pinning approach was thrown
+out and rebuilt.
+
+**3. The chapters.** Five sections, one shared `Chapter` wrapper, each bound to
+its layer by a single `data-layer` attribute — that attribute is the only
+coupling between the copy and the 3D scene.
+
+**4. Interaction passes.** The projects coverflow and case-study modal, the
+skills graph with a working shell, the experience timeline with flip-in-place
+cards, the live map in contact.
+
+**5. The power-on sequence.** A preloader that covers the ~1.7s gap between
+hydration and the first WebGL frame. It ends on a real signal — the scene
+reporting its textures resolved — with a floor so the animation reads and a
+ceiling so a failure can never leave the page covered.
+
+**6. Light theme.** Not an inversion. Engraved gold is a dark-ground effect and
+reads as brown on white, so light mode uses neon display type and solid neon
+card rims instead.
+
+**7. Mobile.** Below 768px there was no navigation at all — the desktop links
+and the chapter rail both hide. A native `<dialog>` bottom sheet now carries the
+same board-trace markup as the rail, and the controls sit in a fixed cluster
+outside `<header>`, which is `inert` for the whole hero act.
+
+**8. Hardening.** Accessibility and performance passes, then the smoke tests.
+
+---
+
+## Testing
 
 ```bash
-npm install
-npm run dev      # http://localhost:3000
-npm run build    # production build + typecheck
-npm run lint
+npm test
 ```
 
-## How the chip works
+Three Playwright tests, one per bug that actually shipped. Not a suite — this is
+a static page with no backend, and broad coverage would be theatre. What it does
+have is three scroll locks, two native dialogs, and a preloader that holds the
+page, and none of those fail *visibly*: a stranded scroll lock looks exactly like
+a page that finished loading.
 
-The chip is **real geometry**, not a sequence of images. Five `BoxGeometry`
-slabs sit on one vertical axis; the source renders are mapped onto their top
-faces (`material-2` — index 2 is `+Y` on a box).
+1. A reduced-motion visitor is released before the preloader's ceiling
+2. Escape closes the mobile sheet **and gives the page back**
+3. The case-study dialog is `display: none` when closed, and restores focus
 
-That decision is the load-bearing one. The source art was nine renders from
-three different cameras — face-on, three-quarter, and a low-angle exploded view
-— and flat images cannot be interpolated between camera positions. With
-geometry, the entire opening is a single continuous camera move: overhead
-(which reads as the face-on plate), swinging down to three-quarter, then pulling
-back as the slabs separate. Nothing has to cross-fade.
+Each was verified to fail with its bug reintroduced before being kept. They run
+against a production build, not `next dev` — two of the three regressions were
+CSS-cascade and hydration-timing issues, and dev-mode source order is not the
+order that ships.
 
-| File | Role |
-| --- | --- |
-| `lib/chip-config.ts` | The five layers: size, thickness, resting/separated Y, accent. Read by the 3D scene *and* the content. |
-| `lib/scroll-store.ts` | Mutable bridge between GSAP and the render loop. Not React state — 60fps through `setState` would re-render the tree every frame. |
-| `hooks/use-chip-timeline.ts` | Lenis + ScrollTrigger. Owns the hero scrub and chapter activation. |
-| `components/chip/` | Scene, layers, camera rig, current flow. |
-| `components/circuit/` | SVG PCB traces (`stroke-dashoffset`), drawn during power-on. |
-
-### Scroll structure
-
-The hero is a 400vh section with a **`sticky`** inner panel — not a GSAP pin.
-Pinning the whole document breaks deep links, in-page find, and scroll
-restoration, and buries the projects several viewport-heights deep. It also
-produced a runaway pin-spacer (96,000px) during development. Sticky has no
-spacer to run away.
-
-After the hero, content is normal page flow. The canvas stays fixed behind it,
-and the chapter nearest the viewport centre lights its layer.
-
-## Editing content
-
-**All copy lives in `lib/data.ts`.** Nothing in that file is imported by the 3D
-scene, so copy edits cannot break the animation.
-
-### Metrics
-
-Numbers carrying `assumed: true` are **placeholders, not measurements**:
-
-```ts
-{ label: "ROC-AUC", value: 91, suffix: "%", assumed: true }
-```
-
-Search the file for `assumed` to find every one. Figures without the flag came
-from the résumé or were measured from the project's own source — for example the
-face classifier's 37.5% across 135 classes, which is read from its
-`class_dictionary.json` rather than estimated.
+---
 
 ## Accessibility
 
-- `prefers-reduced-motion` swaps the canvas for a static exploded plate and
-  skips Lenis entirely; all content stays reachable.
-- No WebGL (older or locked-down browsers) falls back to the same plate.
-- The skill graph is `md`-and-up only; below that, and for screen readers, the
-  same data renders as a grouped list.
-- Every skill node is focusable and announces where the skill shipped.
+Not an afterthought, and not a claim without a number:
 
-## Deploying
+- Every text node measured in both themes: **zero WCAG AA failures**, contrast
+  floor 5.07 (dark) and 4.68 (light) across 505 nodes
+- `prefers-reduced-motion` replaces the WebGL scene with a static plate and
+  disables the scrubbed timeline entirely
+- Full keyboard operation: the skills graph is buttons over a text list that is
+  the *default* view, both dialogs trap and restore focus via `showModal()`
+- Touch targets meet the 44px floor
+- The site works without WebGL — locked-down browsers get the static plate
 
-Free tier on Vercel:
+---
+
+## Running locally
 
 ```bash
-npx vercel --prod
+npm install
+npm run dev
 ```
 
-Or push to GitHub and import the repo at vercel.com — no environment variables
-and no configuration are needed; it is a fully static build.
+```bash
+npm run build && npm start   # production build
+npm run lint                 # eslint
+npm test                     # playwright smoke tests
+```
 
-## Notes
+Node 20+. No environment variables are required — there is nothing to configure.
 
-- `components/chip/**` disables `react-hooks/immutability`. R3F's model *is*
-  imperative mutation inside the render loop; routing it through React state
-  would defeat the point.
-- `ChipCanvas` dispatches one `resize` after mount. R3F's container measurement
-  can settle at 0×0 inside a `fixed` parent and never re-fires, leaving the
-  canvas at its 300×150 default.
+---
+
+## Licence
+
+The code is free to read and learn from. The written content, the résumé, the
+project write-ups and the photography are mine; please don't reuse those.
