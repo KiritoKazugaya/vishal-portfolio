@@ -1,8 +1,8 @@
 # vishal-portfolio
 
-A personal portfolio built as a single scroll-driven scene. A GPU package powers
-on, rotates, and separates into five slabs, and each slab is a chapter of the
-site.
+A personal portfolio implemented as a single scroll-driven scene. A GPU package
+powers on, rotates, and separates into five slabs, and each slab corresponds to
+one chapter of the site.
 
 **Live site:** [vishal-akkala.vercel.app](https://vishal-akkala.vercel.app)
 
@@ -10,11 +10,11 @@ site.
 
 ## The idea
 
-Most engineering portfolios are a list of sections stacked vertically. This one
-is a single object taken apart, because a GPU package is already a five-layer
-stack and the site already had five things to say. Scrolling does not move you
-past sections. It disassembles the chip, and each layer's gap is where a chapter
-lives.
+The conventional engineering portfolio is a vertical list of stacked sections.
+This site is instead a single object that is taken apart. A GPU package is a
+five-layer stack and the site has five chapters, so the two map onto each other
+directly. Scrolling does not advance past sections; it disassembles the chip, and
+each chapter occupies the gap opened between two layers.
 
 | Layer | Chapter |
 | --- | --- |
@@ -24,10 +24,10 @@ lives.
 | `substrate` | Experience and education |
 | `contacts`, the BGA array | Contact |
 
-The chip is one WebGL context fixed behind the whole page. It never scrolls. The
-page scrolls over it, and scroll position reaches the scene through a store
-rather than through React state, because a re-render per frame would be a
-re-render per frame.
+The chip is rendered in one WebGL context fixed behind the whole page. That
+context never scrolls; the page scrolls over it. Scroll position reaches the
+scene through a store rather than through React state, because holding it in
+React state would re-render the tree on every frame.
 
 ---
 
@@ -43,8 +43,9 @@ re-render per frame.
 | **Testing** | Playwright |
 | **Hosting** | Vercel |
 
-Everything renders statically. There is no backend, no database and no client
-data fetching. The entire site is one prerendered route plus a WebGL scene.
+All output is rendered statically. There is no backend, no database and no client
+data fetching. The deployed site consists of one prerendered route plus a WebGL
+scene.
 
 ---
 
@@ -80,10 +81,9 @@ lib/
 
 ### The scroll timeline
 
-The hero owns 400vh of scroll and is deliberately not pinned. Pinning the
-document would break deep links, in-page find, and scroll restoration, so the
-hero is instead a 400vh section with a `sticky` inner panel, scrubbed across four
-phases:
+The hero occupies 400vh of scroll and is not pinned. Pinning the document would
+break deep links, in-page find, and scroll restoration, so the hero is instead a
+400vh section with a `sticky` inner panel, scrubbed across four phases:
 
 | Phase | Range | What happens |
 | --- | --- | --- |
@@ -92,39 +92,39 @@ phases:
 | `separate` | 0.46 to 0.82 | Slabs translate apart on the vertical axis |
 | `settle` | 0.82 to 1.00 | Stack settles into its reading position |
 
-After that the stack stays on screen as a fixed backdrop, and each chapter lights
-its own layer as it passes the viewport centre.
+After the final phase the stack remains on screen as a fixed backdrop, and each
+chapter lights its own layer as it passes the viewport centre.
 
 ### The store
 
 `lib/scroll-store.ts` is a plain mutable object rather than React state. GSAP
 writes to it every frame and the render loop reads it every frame. React
 subscribes only to the few values that actually change the DOM (active chapter,
-hero done, scene ready) through `useSyncExternalStore`. This is the single
-decision that the whole animation layer rests on.
+hero done, scene ready) through `useSyncExternalStore`. The whole animation layer
+depends on this separation between per-frame data and React state.
 
 ### Theme
 
 `data-theme` on `<html>` is the source of truth, and exactly one function writes
 it. A pre-paint inline script resolves the theme before first render, so the page
-never flashes. Two accent tiers exist, because one cannot do both jobs on a light
-ground: `--accent-*` carries text and clears 4.5:1, while `--neon-*` is display
-type and card rims at the 3:1 bar.
+never flashes. Two accent tiers are defined, because a single tier cannot serve
+both purposes on a light ground: `--accent-*` carries text and clears 4.5:1,
+while `--neon-*` carries display type and card rims at the 3:1 bar.
 
 ---
 
 ## How it was built
 
-Roughly the order the work happened in.
+The work happened roughly in this order.
 
-**1. Content before pixels.** The resume, the project inventory, and an honest
-triage of what was worth showing. Metrics that are estimates are marked as
-estimates on the page, with an asterisk and a footnote, rather than quietly
-presented as measurements.
+**1. Content before pixels.** The resume, the project inventory, and a triage of
+what was worth showing. Metrics that are estimates are marked as estimates on the
+page, with an asterisk and a footnote, rather than being presented as
+measurements.
 
 **2. The scene.** One WebGL context, five textured slabs, the scroll timeline,
-and the store that connects them. This is where the pinning approach was thrown
-out and rebuilt.
+and the store that connects them. The pinning approach was discarded and rebuilt
+at this stage.
 
 **3. The chapters.** Five sections sharing one `Chapter` wrapper, each bound to
 its layer by a single `data-layer` attribute. That attribute is the only coupling
@@ -135,18 +135,20 @@ skills graph with a working shell, the experience timeline with flip-in-place
 cards, and the live map in the contact section.
 
 **5. The power-on sequence.** A preloader covering the roughly 1.7 second gap
-between hydration and the first WebGL frame. It ends on a real signal, namely the
-scene reporting its textures resolved, with a floor so the animation reads and a
-ceiling so that a failure can never leave the page covered.
+between hydration and the first WebGL frame. It is dismissed on an explicit
+signal, namely the scene reporting its textures resolved, with a floor so that
+the animation remains legible and a ceiling so that a failure cannot leave the
+page covered.
 
-**6. Light theme.** Not an inversion. Engraved gold is a dark-ground effect and
-reads as brown on white, so light mode uses neon display type and solid neon card
-rims instead.
+**6. Light theme.** The light theme is not an inversion. Engraved gold is a
+dark-ground effect and reads as brown on white, so light mode uses neon display
+type and solid neon card rims instead.
 
 **7. Mobile.** Below 768px there was no navigation at all, because the desktop
-links and the chapter rail both hide. A native `<dialog>` bottom sheet now
-carries the same board-trace markup as the rail, and the controls sit in a fixed
-cluster outside `<header>`, which is `inert` for the whole hero act.
+links and the chapter rail are both hidden at that width. A native `<dialog>`
+bottom sheet now carries the same board-trace markup as the rail, and the
+controls sit in a fixed cluster outside `<header>`, which is `inert` for the whole
+hero act.
 
 **8. Hardening.** Accessibility and performance passes, then the smoke tests.
 
@@ -159,25 +161,25 @@ npm test
 ```
 
 Three Playwright tests, one for each bug that actually shipped. This is not a
-full suite. The site is a static page with no backend, and broad coverage would
-be theatre. What it does have is three scroll locks, two native dialogs, and a
-preloader that holds the page, and none of those fail visibly. A stranded scroll
-lock looks exactly like a page that has finished loading.
+full suite. The site is a static page with no backend, so broad coverage would
+add little. What the site does have is three scroll locks, two native dialogs,
+and a preloader that holds the page, and none of those fail visibly. A stranded
+scroll lock presents the same visual state as a page that has finished loading.
 
 1. A reduced-motion visitor is released before the preloader's ceiling.
 2. Escape closes the mobile sheet and gives the page back.
 3. The case-study dialog is `display: none` when closed, and restores focus.
 
-Each test was verified to fail with its bug reintroduced before being kept. They
-run against a production build rather than `next dev`, because two of the three
-regressions were CSS cascade and hydration-timing issues, and dev-mode source
-order is not the order that ships.
+Each test was verified to fail with its bug reintroduced before it was kept. The
+tests run against a production build rather than `next dev`, because two of the
+three regressions were CSS cascade and hydration-timing issues, and dev-mode
+source order differs from the order that ships.
 
 ---
 
 ## Accessibility
 
-Not an afterthought, and not a claim without a number behind it.
+The following properties were measured rather than assumed.
 
 * Every text node was measured in both themes. Zero WCAG AA failures, with a
   contrast floor of 5.07 in dark and 4.68 in light across 505 nodes.
@@ -187,7 +189,7 @@ Not an afterthought, and not a claim without a number behind it.
   a text list that is the default view, and both dialogs trap and restore focus
   through `showModal()`.
 * Touch targets meet the 44px floor.
-* The site works without WebGL, so locked-down browsers get the static plate.
+* The site works without WebGL, so locked-down browsers receive the static plate.
 
 ---
 
@@ -204,12 +206,12 @@ npm run lint                 # eslint
 npm test                     # playwright smoke tests
 ```
 
-Node 20 or later. No environment variables are required, because there is nothing
-to configure.
+Node 20 or later. No environment variables are needed, as there is nothing to
+configure.
 
 ---
 
 ## Licence
 
-The code is free to read and learn from. The written content, the resume, the
-project write-ups and the photography are mine, so please do not reuse those.
+The code is available to read and to learn from. The written content, the
+resume, the project write-ups and the photography are not licensed for reuse.
