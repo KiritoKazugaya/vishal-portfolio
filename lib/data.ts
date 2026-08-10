@@ -30,12 +30,12 @@ export const profile = {
   location: "Florida, USA",
   available: "Open to AI/ML and Data Engineering roles",
   summary:
-    "AI/ML Engineer with 5+ years building machine learning models, Generative AI applications, and scalable data solutions across financial services, healthcare, and retail. I work the whole path — retrieval and NLP systems, MLOps, model deployment, and large-scale processing with Python, PySpark, PyTorch, Databricks, AWS, and Azure.",
+    "AI/ML Engineer with 5+ years building machine learning models, Generative AI applications, and scalable data solutions across financial services, healthcare, and retail. I work the whole path: retrieval and NLP systems, MLOps, model deployment, and large-scale processing with Python, PySpark, PyTorch, Databricks, AWS, and Azure.",
   philosophy:
     "A model is the easy part. The work that decides whether it matters is everything around it: the features it trains on, the latency it answers in, the drift that erodes it, and whether anyone trusts the number it produces.",
   interests: [
     "Retrieval systems that stay grounded under pressure",
-    "Evaluation — how you prove an LLM system actually works",
+    "Evaluation: how you prove an LLM system actually works",
     "The gap between a notebook and something on-call",
   ],
   photo: "/assets/vishal.jpg",
@@ -72,7 +72,7 @@ export const socials: SocialLink[] = [
 ]
 
 /* -------------------------------------------------------------------------- */
-/*  Skills — every entry says where it actually shipped                        */
+/*  Skills: every entry says where it actually shipped                        */
 /* -------------------------------------------------------------------------- */
 
 export const skillGroups: SkillGroup[] = [
@@ -86,7 +86,7 @@ export const skillGroups: SkillGroup[] = [
       { name: "XGBoost", category: "AI/ML", usedIn: "Churn prediction platform", weight: 3 },
       { name: "LangChain", category: "AI/ML", usedIn: "Enterprise RAG knowledge assistant", weight: 3 },
       { name: "RAG", category: "AI/ML", usedIn: "Internal knowledge discovery at Capital One", weight: 3 },
-      { name: "LLMs", category: "AI/ML", usedIn: "Study Tutor · Gemini 2.5 Flash", weight: 3 },
+      { name: "LLMs", category: "AI/ML", usedIn: "Study Tutor, running on Gemini 2.5 Flash", weight: 3 },
       { name: "Hugging Face", category: "AI/ML", usedIn: "Transformer fine-tuning & NER", weight: 2 },
       { name: "OpenCV", category: "AI/ML", usedIn: "Face detection in the 135-class classifier", weight: 2 },
       { name: "TensorFlow", category: "AI/ML", usedIn: "Deep learning experimentation", weight: 1 },
@@ -184,7 +184,7 @@ const RAW_PROJECTS: RawProject[] = [
       { title: "Serve", detail: "FastAPI endpoints in Docker containers keep inference consistent across environments." },
     ],
     decisions: [
-      "Chunk overlap tuned against retrieval relevance rather than a default — small chunks lost context, large ones diluted the embedding.",
+      "Chunk overlap tuned against retrieval relevance rather than a default: small chunks lost context, large ones diluted the embedding.",
       "Citations returned as structured metadata, not parsed out of the model's prose, so the UI can link them reliably.",
       "Containerised inference so the same image runs in every environment and latency stops depending on the host.",
     ],
@@ -214,7 +214,7 @@ const RAW_PROJECTS: RawProject[] = [
     problem:
       "Retention teams couldn't see which customers were about to leave, and every model update was a manual, untracked event that nobody could reproduce.",
     goal:
-      "Predict at-risk customers and put the model inside an automated lifecycle — training, tracking, deployment, and monitoring.",
+      "Predict at-risk customers and put the model inside an automated lifecycle: training, tracking, deployment, and monitoring.",
     architecture: [
       { title: "Features", detail: "Behavioural signals are engineered into a versioned training set." },
       { title: "Train", detail: "XGBoost models are tuned and every run is logged to MLflow with its parameters." },
@@ -222,7 +222,7 @@ const RAW_PROJECTS: RawProject[] = [
       { title: "Monitor", detail: "Prediction quality and feature drift are checked continuously against the training distribution." },
     ],
     decisions: [
-      "The churn label was defined with the business before any modelling — the first definition looked reasonable and produced a model nobody could act on.",
+      "The churn label was defined with the business before any modelling. The first definition looked reasonable and produced a model nobody could act on.",
       "Drift monitoring watches input features, not just output quality, so degradation is visible before it reaches predictions.",
       "Every training run is reproducible from its MLflow record, which is what made automated promotion safe.",
     ],
@@ -231,7 +231,7 @@ const RAW_PROJECTS: RawProject[] = [
     result:
       "Surfaced at-risk customers for retention campaigns and removed manual intervention from the model lifecycle.",
     learned:
-      "The model is maybe a fifth of the work. The rest is the loop that keeps it alive — and that loop is what fails first.",
+      "The model is maybe a fifth of the work. The rest is the loop that keeps it alive, and that loop is what fails first.",
     metrics: [
       { label: "ROC-AUC", value: 91, suffix: "%", assumed: true },
       { label: "Manual steps removed", value: 80, suffix: "%", assumed: true },
@@ -245,7 +245,7 @@ const RAW_PROJECTS: RawProject[] = [
     title: "Ocean's Smoke Shop",
     tagline: "A live retail catalogue running on a real POS, for a real store.",
     featured: true,
-    domain: "Full-Stack · Commerce",
+    domain: "Full-Stack and Commerce",
     year: "2026",
     accent: "--accent-emerald",
     tech: ["Next.js", "TypeScript", "PostgreSQL", "EposNow API", "Cloudflare R2", "Vercel"],
@@ -261,16 +261,16 @@ const RAW_PROJECTS: RawProject[] = [
       { title: "Deploy", detail: "Continuous deployment to Vercel, with the store account owning the production project." },
     ],
     decisions: [
-      "The site reads from the POS and never writes back to it — the till is the source of truth for a business that runs on it daily.",
+      "The site reads from the POS and never writes back to it; the till is the source of truth for a business that runs on it daily.",
       "Images resolve by file ID rather than filename, so re-uploads and renames in Drive never orphan a product photo.",
       "The owner gets toggles, not a CMS. Every merchandising control is a switch with one obvious effect.",
     ],
     challenges:
-      "Reconciling a POS catalogue built for a till — inconsistent naming, missing categories, duplicate SKUs — into something a customer could actually browse.",
+      "Reconciling a POS catalogue built for a till (inconsistent naming, missing categories, duplicate SKUs) into something a customer could actually browse.",
     result:
       "Live and serving the full catalogue. The store's inventory, pricing, and promotions are online and current for the first time.",
     learned:
-      "Building for a non-technical owner changes every interface decision. The feature that mattered most wasn't a feature — it was making sure nothing he clicked could break the shop.",
+      "Building for a non-technical owner changes every interface decision. The feature that mattered most wasn't a feature; it was making sure nothing he clicked could break the shop.",
     metrics: [
       { label: "Products live", value: 1721 },
       { label: "Product photos linked", value: 286 },
@@ -278,7 +278,7 @@ const RAW_PROJECTS: RawProject[] = [
     ],
     repo: null,
     demo: "https://www.oceanssmokeshop.com",
-    note: "Live and in active development — the customer-facing catalogue is complete; admin tooling and remaining photography are still landing.",
+    note: "Live and in active development. The customer-facing catalogue is complete; admin tooling and remaining photography are still landing.",
   },
   {
     slug: "study-tutor",
@@ -292,7 +292,7 @@ const RAW_PROJECTS: RawProject[] = [
     problem:
       "Revision material is passive. Reading your own notes back tells you nothing about what you don't know yet, and building quizzes by hand is exactly the work you're avoiding.",
     goal:
-      "Turn a folder of notes into active study material — summaries, quizzes in several formats, flashcards, and grading that remembers what you got wrong.",
+      "Turn a folder of notes into active study material: summaries, quizzes in several formats, flashcards, and grading that remembers what you got wrong.",
     architecture: [
       { title: "Ingest", detail: "Notes are uploaded as .txt, .md, or .pdf and grouped into a subject." },
       { title: "Pre-warm", detail: "A background thread generates the summary and a question pool on upload, so the first click is instant." },
@@ -301,14 +301,14 @@ const RAW_PROJECTS: RawProject[] = [
       { title: "Remember", detail: "Wrong answers write their topic tag to persistent memory, which biases later quizzes toward weak areas." },
     ],
     decisions: [
-      "Subjects are fingerprinted by file name, size, and mtime — edit a note and the cache invalidates itself, with no manual refresh.",
+      "Subjects are fingerprinted by file name, size, and mtime. Edit a note and the cache invalidates itself, with no manual refresh.",
       "The question pool is served destructively and refilled in the background, so personalisation costs zero extra model calls.",
       "Thinking budget set to zero: the latency win was worth far more than the reasoning depth for this workload.",
     ],
     challenges:
       "Every answer is a network round-trip to a hosted model, so the honest version of this app would make a student wait several seconds on every click. Waiting is where attention goes.",
     result:
-      "The cache layer means the wait lands where nobody notices it. Upload your notes, and by the time you have finished reading the page the summary and a full question pool already exist — every click after that is served from disk, instantly, with no spinner to break concentration.",
+      "The cache layer means the wait lands where nobody notices it. Upload your notes, and by the time you have finished reading the page the summary and a full question pool already exist. Every click after that is served from disk, instantly, with no spinner to break concentration.",
     learned:
       "Latency is a study-tool feature, not an engineering vanity metric. A three-second pause is enough for a student to pick up their phone, and no amount of answer quality wins that attention back.",
     metrics: [
@@ -328,7 +328,7 @@ const RAW_PROJECTS: RawProject[] = [
     accent: "--accent-amber",
     tech: ["Python", "OpenCV", "scikit-learn", "PyWavelets", "Flask", "React"],
     problem:
-      "Identify which of 135 film actors appears in an uploaded photo — a hard multi-class problem with a badly imbalanced, scraped dataset.",
+      "Identify which of 135 film actors appears in an uploaded photo: a hard multi-class problem with a badly imbalanced, scraped dataset.",
     goal:
       "Build the whole path: face detection, feature engineering, classifier training, and a served inference API behind a real interface.",
     architecture: [
@@ -339,13 +339,13 @@ const RAW_PROJECTS: RawProject[] = [
     ],
     decisions: [
       "Requiring two detected eyes before accepting a crop threw away usable images but removed most of the garbage the scraper collected.",
-      "Wavelet detail stacked with raw pixels — the frequency information carried facial structure that raw pixels alone kept losing to lighting.",
+      "Wavelet detail stacked with raw pixels: the frequency information carried facial structure that raw pixels alone kept losing to lighting.",
       "Probabilities returned alongside the label, because on 135 classes a bare prediction tells the user nothing about confidence.",
     ],
     challenges:
-      "Severe class imbalance — the rarest class had a single usable image — and a scraped dataset where a meaningful share of photos weren't the labelled person at all.",
+      "Severe class imbalance (the rarest class had a single usable image) and a scraped dataset where a meaningful share of photos weren't the labelled person at all.",
     result:
-      "37.5% top-1 accuracy across 135 classes against a 0.74% random baseline — roughly a 50x lift, with a working end-to-end inference path.",
+      "37.5% top-1 accuracy across 135 classes against a 0.74% random baseline: roughly a 50x lift, with a working end-to-end inference path.",
     learned:
       "A classical feature stack takes you surprisingly far, and then stops hard. The ceiling here is the architecture: this problem wants learned embeddings, not engineered ones.",
     metrics: [
@@ -368,10 +368,10 @@ const RAW_PROJECTS: RawProject[] = [
     problem:
       "Everyone believes a good README drives GitHub stars. Nobody had checked, and the belief shapes how a lot of people spend their time.",
     goal:
-      "Start from the whole of GitHub — roughly 300 million public repositories — and narrow it, by engineered criteria rather than convenience, down to a population where the question can actually be answered.",
+      "Start from the whole of GitHub (roughly 300 million public repositories) and narrow it, by engineered criteria rather than convenience, down to a population where the question can actually be answered.",
     architecture: [
       { title: "Query at source", detail: "Google BigQuery over the GH Archive public dataset puts all ~300M public repositories in scope, rather than whatever the search API happens to rank first." },
-      { title: "Engineer the filter", detail: "Activity, age, star-threshold, and language features cut that population down to the ~29K repositories that can support the question — the funnel is the method, not a sampling shortcut." },
+      { title: "Engineer the filter", detail: "Activity, age, star-threshold, and language features cut that population down to the ~29K repositories that can support the question. The funnel is the method, not a sampling shortcut." },
       { title: "Enrich", detail: "A GitHub API crawler recursively bisects date windows to beat the 1,000-result search cap, pulling full README text for the surviving set." },
       { title: "Join", detail: "1.81M daily star events are joined to repository metadata to reconstruct each project's growth curve." },
       { title: "Model", detail: "OLS, Ridge, Lasso, Random Forest, and XGBoost are compared under cross-validation on README features." },
@@ -380,19 +380,19 @@ const RAW_PROJECTS: RawProject[] = [
     ],
     decisions: [
       "Reported the null result rather than hunting for a specification that produced a positive one.",
-      "Recursive date-window bisection to defeat the search API's result cap — the difference between a biased sample and a usable one.",
-      "Cross-validated every model, because the holdout R² alone would have made a weak result look stronger than it was.",
+      "Recursive date-window bisection to defeat the search API's result cap: the difference between a biased sample and a usable one.",
+      "Cross-validated every model, because the holdout R-squared alone would have made a weak result look stronger than it was.",
     ],
     challenges:
       "The GitHub search API caps results at 1,000 per query, which quietly biases any naive collection toward whatever it ranks first.",
     result:
-      "README structure does not predict stars — best cross-validated R² of 0.056 across five model families. Only link count showed any significant relationship.",
+      "README structure does not predict stars: best cross-validated R-squared of 0.056 across five model families. Only link count showed any significant relationship.",
     learned:
       "A well-measured negative result is more useful than a positive one you had to torture the data for. The interesting output here was the pipeline, not the coefficient.",
     metrics: [
       { label: "Repositories in scope", value: 300, suffix: "M" },
       { label: "Survived feature filtering", value: 29, suffix: "K" },
-      { label: "Best CV R²", value: 0.056 },
+      { label: "Best CV R-squared", value: 0.056 },
     ],
     repo: null,
     demo: null,
@@ -401,14 +401,14 @@ const RAW_PROJECTS: RawProject[] = [
     slug: "whatsapp-supplement-agent",
     title: "WhatsApp Reminder Agent",
     tagline: "A deployed service that turns a daily routine into a conversation.",
-    domain: "Automation · Integration",
+    domain: "Automation and Integration",
     year: "2026",
     accent: "--accent-emerald",
     tech: ["Node.js", "Express", "WhatsApp Cloud API", "Google Sheets API", "node-cron", "Render"],
     problem:
       "Getting a family member to keep a daily supplement routine. Phone alarms get dismissed without being read; a paper checklist gets lost.",
     goal:
-      "Deliver reminders where the person already is — WhatsApp — and record what actually got taken, without asking them to learn anything new.",
+      "Deliver reminders on WhatsApp, where the person already is, and record what actually got taken, without asking them to learn anything new.",
     architecture: [
       { title: "Schedule", detail: "Four cron jobs fire morning, afternoon, evening, and night on Asia/Kolkata time." },
       { title: "Send", detail: "Each reminder posts a WhatsApp interactive list containing only the items still outstanding." },
@@ -417,12 +417,12 @@ const RAW_PROJECTS: RawProject[] = [
       { title: "Derive", detail: "Pending state is read back from the day's rows, so the system holds no state of its own." },
     ],
     decisions: [
-      "State is derived from the sheet rather than stored in the service — a restart on free-tier hosting loses nothing.",
+      "State is derived from the sheet rather than stored in the service; a restart on free-tier hosting loses nothing.",
       "Each reminder lists only what's still outstanding, so the last message of the day is short instead of nagging.",
       "An external scheduler triggers the jobs, because free-tier instances sleep and an internal cron would sleep with them.",
     ],
     challenges:
-      "Free-tier hosting sleeps after inactivity, which makes an internally-scheduled cron unreliable — the fix was to stop trusting the process to stay awake.",
+      "Free-tier hosting sleeps after inactivity, which makes an internally-scheduled cron unreliable. The fix was to stop trusting the process to stay awake.",
     result:
       "Deployed and running daily against a real WhatsApp Business number, writing to a live spreadsheet.",
     learned:
@@ -454,7 +454,7 @@ const RAW_PROJECTS: RawProject[] = [
       { title: "Explore", detail: "Year sliders and country, region, and technology filters drive every view live." },
     ],
     decisions: [
-      "A generation-versus-capacity bubble scatter, because the ratio says something neither axis says alone — how hard installed capacity is actually working.",
+      "A generation-versus-capacity bubble scatter, because the ratio says something neither axis says alone: how hard installed capacity is actually working.",
       "Fuel technologies grouped into renewable and non-renewable at the data layer, so every view tells the same story consistently.",
     ],
     challenges:
@@ -470,7 +470,7 @@ const RAW_PROJECTS: RawProject[] = [
     ],
     repo: null,
     demo: null,
-    note: "Built as group coursework at the University of Florida — the energy workbooks and analysis were my contribution.",
+    note: "Built as group coursework at the University of Florida; the energy workbooks and analysis were my contribution.",
   },
   {
     slug: "vendor-price-scraper",
@@ -481,7 +481,7 @@ const RAW_PROJECTS: RawProject[] = [
     accent: "--accent-violet",
     tech: ["Python", "BeautifulSoup", "requests", "openpyxl"],
     problem:
-      "Choosing retail display cases across two vendors meant comparing hundreds of products on price and physical capacity — and the dimensions were written inconsistently on every single page.",
+      "Choosing retail display cases across two vendors meant comparing hundreds of products on price and physical capacity. The dimensions were written inconsistently on every single page.",
     goal:
       "Crawl both catalogues, normalise the dimension text, and rank every case by storage volume bought per dollar.",
     architecture: [
@@ -492,7 +492,7 @@ const RAW_PROJECTS: RawProject[] = [
       { title: "Audit", detail: "Every product whose dimensions failed to parse is written to a separate sheet rather than dropped." },
     ],
     decisions: [
-      "Four cascading extraction strategies per vendor — spec table, definition list, bullets, then block-text regex — because no single one covered the catalogue.",
+      "Four cascading extraction strategies per vendor (spec table, definition list, bullets, then block-text regex), because no single one covered the catalogue.",
       "Failures are written to an audit sheet instead of being silently skipped, so the gap in the data is visible rather than invisible.",
       "Output files are auto-versioned, so a re-run never overwrites the comparison someone is already reading.",
     ],
@@ -519,7 +519,7 @@ const RAW_PROJECTS: RawProject[] = [
     accent: "--accent-cyan",
     tech: ["WordPress", "Elementor Pro", "HubSpot", "Google Tag Manager"],
     problem:
-      "A senior-care SaaS company needed a marketing site that spoke to three different audiences — home care agencies, families, and health partners — without splitting into three different products.",
+      "A senior-care SaaS company needed a marketing site that spoke to three different audiences (home care agencies, families, and health partners) without splitting into three different products.",
     goal:
       "Deliver a live marketing presence with a clear path from each audience to a demo request, handed over in a stack the client's own team could maintain.",
     architecture: [
@@ -529,7 +529,7 @@ const RAW_PROJECTS: RawProject[] = [
       { title: "Measure", detail: "Tag Manager and Hotjar instrument the funnel from landing to demo request." },
     ],
     decisions: [
-      "WordPress and Elementor over a coded build, deliberately — the client needed to own edits after handover, and a bespoke front end would have made them dependent on me.",
+      "WordPress and Elementor over a coded build, deliberately. The client needed to own edits after handover, and a bespoke front end would have made them dependent on me.",
       "Testimonials placed directly beneath each audience path, because the objection they answer is different for an agency than for a family.",
     ],
     challenges:
@@ -544,7 +544,7 @@ const RAW_PROJECTS: RawProject[] = [
     ],
     repo: null,
     demo: "https://www.mariposa.care",
-    note: "Client web work, built on WordPress and Elementor rather than a coded front end — included here as delivery work, not as an engineering piece.",
+    note: "Client web work, built on WordPress and Elementor rather than a coded front end. Included here as delivery work, not as an engineering piece.",
   },
   {
     slug: "great-scoops",
@@ -567,20 +567,20 @@ const RAW_PROJECTS: RawProject[] = [
       "Get the shop online quickly on a platform the owner could keep editing without a developer, with the menu and a way to make contact as the two things everything points at.",
     architecture: [
       { title: "Structure", detail: "A single scrolling page: hero, flavours, gallery, menu, contact, and a newsletter close." },
-      { title: "Menu", detail: "Prices grouped into four boards — ice creams, smoothies, milkshakes and sundaes — so a customer finds a price without hunting." },
+      { title: "Menu", detail: "Prices grouped into four boards (ice creams, smoothies, milkshakes and sundaes), so a customer finds a price without hunting." },
       { title: "Capture", detail: "A contact form with file attachments, plus a newsletter sign-up offering a first-purchase discount." },
       { title: "Trust", detail: "Address, map and today's opening hours sit directly beside the form, so the page answers 'are you open now' before it asks for anything." },
       { title: "Support", detail: "A live chat widget catches questions the page does not already answer." },
     ],
     decisions: [
       "Built on the platform the owner asked for rather than a coded front end. A shop that has to phone a developer to change a price will simply stop updating the site.",
-      "The menu is the centre of the page, not a sub-page — it is the single thing customers arrive wanting, and burying it behind navigation costs more than it saves.",
-      "Three separate ways to convert — order, message, subscribe — because a walk-in business, an enquiry and a returning customer are three different intentions.",
+      "The menu is the centre of the page, not a sub-page. It is the single thing customers arrive wanting, and burying it behind navigation costs more than it saves.",
+      "Three separate ways to convert (order, message, subscribe), because a walk-in business, an enquiry and a returning customer are three different intentions.",
     ],
     challenges:
       "Working inside a template builder means the layout you want and the layout the tool offers are rarely the same thing. Most of the effort went into making a stock template not look like one.",
     result:
-      "Live at greatscoops1.com, carrying the shop's full menu, hours, location and contact routes — and the owner can update prices without calling anyone.",
+      "Live at greatscoops1.com, carrying the shop's full menu, hours, location and contact routes. And the owner can update prices without calling anyone.",
     learned:
       "Picking the boring platform is a design decision, not a shortcut. The right question was not what I would enjoy building, it was what the shop could still maintain a year later.",
     metrics: [
@@ -590,7 +590,7 @@ const RAW_PROJECTS: RawProject[] = [
     ],
     repo: null,
     demo: "https://greatscoops1.com",
-    note: "Built on GoDaddy's site builder at the owner's request, so the shop could maintain it themselves — included as client delivery work, not as an engineering piece.",
+    note: "Built on GoDaddy's site builder at the owner's request, so the shop could maintain it themselves. Included as client delivery work, not as an engineering piece.",
   },
   {
     slug: "cuts-and-brows",
@@ -614,17 +614,17 @@ const RAW_PROJECTS: RawProject[] = [
     architecture: [
       { title: "Separate", detail: "Home, Services, Gallery, Special Offers and Contact as distinct pages rather than one scroll." },
       { title: "Price", detail: "A full service menu with prices, so a customer qualifies themselves before they get in touch." },
-      { title: "Discount", detail: "Student offers get their own page — microblading, lamination, waxing and threading each with their own rate." },
+      { title: "Discount", detail: "Student offers get their own page: microblading, lamination, waxing and threading each with their own rate." },
       { title: "Reach", detail: "Phone, email, WhatsApp and a form, alongside address and today's opening hours." },
       { title: "Show", detail: "A gallery carries the work, because in this trade the portfolio is the pitch." },
     ],
     decisions: [
       "Multi-page here, single-page for the ice cream shop. A salon's service list is browsed and compared before booking; a scoop menu is glanced at. The structure should follow how the customer actually decides.",
-      "WhatsApp promoted to a first-class channel next to the phone number — for a walk-in business, a message gets answered between clients when a call cannot be.",
+      "WhatsApp promoted to a first-class channel next to the phone number. For a walk-in business, a message gets answered between clients when a call cannot be.",
       "Student pricing pulled onto its own page rather than buried in the menu. In a university town that is the differentiator, not a footnote.",
     ],
     challenges:
-      "Ranking locally for a service people search by name — 'eyebrow threading', 'brazilian wax' — while keeping the pages readable for the person who actually lands on them.",
+      "Ranking locally for a service people search by name ('eyebrow threading', 'brazilian wax') while keeping the pages readable for the person who actually lands on them.",
     result:
       "Live at cutsandbrows.com with the full service menu, student offers, gallery and four routes to the salon.",
     learned:
@@ -636,7 +636,7 @@ const RAW_PROJECTS: RawProject[] = [
     ],
     repo: null,
     demo: "https://cutsandbrows.com",
-    note: "Built on GoDaddy's site builder so the salon can maintain it themselves — included as client delivery work, not as an engineering piece.",
+    note: "Built on GoDaddy's site builder so the salon can maintain it themselves. Included as client delivery work, not as an engineering piece.",
   },
 ]
 

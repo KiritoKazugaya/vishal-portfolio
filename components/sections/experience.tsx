@@ -192,7 +192,7 @@ export function Experience() {
     <Chapter
       id="substrate"
       title="Experience & education"
-      lead="Five years across financial services, healthcare, and retail — and the degrees that anchor it."
+      lead="Five years across financial services, healthcare, and retail, and the degrees that anchor it."
     >
       <p className={`eyebrow ${s.hint}`} data-reveal>
         <BarChart3 className={s.hintIcon} aria-hidden />

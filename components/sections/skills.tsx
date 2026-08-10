@@ -175,7 +175,7 @@ export function Skills() {
     <Chapter
       id="die"
       title="Skills"
-      lead="Five rails off one core. Every bead is something that shipped — trace one to see where."
+      lead="Five rails off one core. Every bead is something that shipped, so trace one to see where."
     >
       <div data-reveal>
         {/* ------------------------------------------------------- filters */}

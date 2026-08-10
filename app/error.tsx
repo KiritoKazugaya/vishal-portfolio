@@ -38,7 +38,7 @@ export default function Error({
 
       <p className="max-w-[46ch] text-sm text-mute">
         It renders a live WebGL scene, which some browsers and locked-down
-        machines refuse. Reloading usually fixes it — and the résumé below works
+        machines refuse. Reloading usually fixes it, and the résumé below works
         either way.
       </p>
 

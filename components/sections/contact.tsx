@@ -55,7 +55,7 @@ const MAP_SRC =
   `?bbox=${encodeURIComponent(BBOX)}&layer=mapnik&marker=${LAT}%2C${LON}`
 const MAP_LINK = `https://www.openstreetmap.org/?mlat=${LAT}&mlon=${LON}#map=12/${LAT}/${LON}`
 
-const SUBJECT = encodeURIComponent("Hello Vishal — from your portfolio")
+const SUBJECT = encodeURIComponent("Hello Vishal, from your portfolio")
 
 /** What the clipboard button hands over for a given route. */
 function copyableFor(href: string) {

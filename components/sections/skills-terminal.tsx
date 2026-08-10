@@ -150,7 +150,7 @@ export function SkillTerminal({ hovered }: { hovered: Skill | null }) {
           hits.length
             ? [
                 { kind: "meta", text: `${hits.length} match${hits.length === 1 ? "" : "es"}` },
-                ...hits.map((k) => ({ kind: "out" as const, text: `  ${k.name} — ${k.usedIn}` })),
+                ...hits.map((k) => ({ kind: "out" as const, text: `  ${k.name}: ${k.usedIn}` })),
               ]
             : [{ kind: "err", text: `nothing matches "${arg}"` }],
         )
@@ -160,10 +160,10 @@ export function SkillTerminal({ hovered }: { hovered: Skill | null }) {
       if (verb === "open") {
         const target = SECTIONS[arg.toLowerCase()]
         if (!target) {
-          push([{ kind: "err", text: `unknown section "${arg}" — try ${Object.keys(SECTIONS).join(", ")}` }])
+          push([{ kind: "err", text: `unknown section "${arg}", try ${Object.keys(SECTIONS).join(", ")}` }])
           return
         }
-        push([{ kind: "meta", text: `jumping to ${arg.toLowerCase()}…` }])
+        push([{ kind: "meta", text: `jumping to ${arg.toLowerCase()}...` }])
         scrollToLayer(target)
         return
       }
@@ -182,7 +182,7 @@ export function SkillTerminal({ hovered }: { hovered: Skill | null }) {
 
       if (Array.isArray(found)) {
         push([
-          { kind: "meta", text: `${found.length} matches — be more specific` },
+          { kind: "meta", text: `${found.length} matches, be more specific` },
           ...found.slice(0, 8).map((k) => ({ kind: "out" as const, text: `  ${k.name}` })),
         ])
         return
@@ -239,7 +239,7 @@ export function SkillTerminal({ hovered }: { hovered: Skill | null }) {
           <i style={{ background: "#febc2e" }} />
           <i style={{ background: "#28c840" }} />
         </span>
-        <span className={s.title}>where.sh — skill provenance</span>
+        <span className={s.title}>where.sh: skill provenance</span>
         <span className={s.meta}>{hovered ? hovered.category : "ready"}</span>
       </div>
 
@@ -272,7 +272,7 @@ export function SkillTerminal({ hovered }: { hovered: Skill | null }) {
           <span className={s.prompt} aria-hidden>
             $
           </span>
-          <span className="sr-only">Terminal input — type help for commands</span>
+          <span className="sr-only">Terminal input: type help for commands</span>
           <input
             ref={inputRef}
             className={s.input}

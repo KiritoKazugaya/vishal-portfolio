@@ -24,8 +24,8 @@ export const metadata: Metadata = {
      declaring nothing at all. */
   metadataBase: new URL("https://vishal-akkala.vercel.app"),
   title: {
-    default: `${profile.name} — ${profile.role}`,
-    template: `%s — ${profile.name}`,
+    default: `${profile.name} | ${profile.role}`,
+    template: `%s | ${profile.name}`,
   },
   description: profile.summary,
   keywords: [
@@ -38,14 +38,14 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: profile.name }],
   openGraph: {
-    title: `${profile.name} — ${profile.role}`,
+    title: `${profile.name} | ${profile.role}`,
     description: profile.headline,
     type: "profile",
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: `${profile.name} — ${profile.role}`,
+    title: `${profile.name} | ${profile.role}`,
     description: profile.headline,
   },
   robots: { index: true, follow: true },

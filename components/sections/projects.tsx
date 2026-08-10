@@ -214,7 +214,7 @@ export function Projects() {
             tabIndex={0}
             role="region"
             aria-roledescription="carousel"
-            aria-label="Projects — use the left and right arrow keys"
+            aria-label="Projects: use the left and right arrow keys"
             onKeyDown={onKeyDown}
           >
             <div className={s.arc}>
@@ -398,7 +398,7 @@ function Card({
       aria-haspopup={centre ? "dialog" : undefined}
       aria-label={
         centre
-          ? `${project.title} — open case study`
+          ? `${project.title}: open case study`
           : `Bring ${project.title} to the front`
       }
       /* Only the front card takes tab focus; the arrows and arrow keys are the
