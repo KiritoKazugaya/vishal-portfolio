@@ -160,8 +160,18 @@ export function Nav() {
    * already handles the reflow.
    */
   useEffect(() => {
-    setScrollLock(open)
-    document.body.style.overflow = open ? "hidden" : ""
+    /*
+     * Only ever write the lock, never write the release.
+     *
+     * `overflow = open ? "hidden" : ""` looks equivalent and is not: on mount,
+     * with the sheet closed, it wrote "" over whatever was already there. Three
+     * components share this one property and the preloader sets it first, so
+     * this line silently unlocked the page underneath the power-on plate for the
+     * entire sequence. Found by a smoke test, not by reading the code.
+     */
+    if (!open) return
+    setScrollLock(true)
+    document.body.style.overflow = "hidden"
     return () => {
       setScrollLock(false)
       document.body.style.overflow = ""

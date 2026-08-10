@@ -86,9 +86,12 @@ export function Projects() {
    * screen to explain why. Keyed on `open`, it cannot be stranded.
    */
   useEffect(() => {
-    const locked = open !== null
-    setScrollLock(locked)
-    document.body.style.overflow = locked ? "hidden" : ""
+    /* Only ever write the lock, never write the release — see the matching note
+       in nav.tsx. Writing "" on mount clobbered the preloader's lock, which
+       shares this property and sets it first. */
+    if (open === null) return
+    setScrollLock(true)
+    document.body.style.overflow = "hidden"
     return () => {
       setScrollLock(false)
       document.body.style.overflow = ""
