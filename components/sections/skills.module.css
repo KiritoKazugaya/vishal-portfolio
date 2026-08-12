@@ -79,6 +79,16 @@
      this leaves the square ~26px of slack under the pills; at 1440px, ~50px. */
   --reserve: clamp(9rem, 5vh + 6rem, 12rem);
   --dur: 3.6s;
+  /*
+   * One knob for the whole stage.
+   *
+   * It has to scale BOTH axes together, never one. Node height comes from `cqi`,
+   * which tracks the container's WIDTH, while row pitch is a percentage of its
+   * HEIGHT. Shrinking only the height would close the gap between rows against a
+   * node that had not shrunk with it, and there is only a couple of pixels of
+   * air there to begin with.
+   */
+  --stage-scale: 0.9;
 
   display: none;
   flex-direction: column;
@@ -91,8 +101,10 @@
    * stage fills the screen; width now takes the whole column, which is what
    * gives every capsule room to breathe.
    */
-  width: 100%;
-  height: clamp(32rem, calc(100svh - var(--reserve)), 52rem);
+  width: calc(100% * var(--stage-scale));
+  height: calc(
+    clamp(32rem, calc(100svh - var(--reserve)), 52rem) * var(--stage-scale)
+  );
   margin-inline: auto;
   padding: clamp(0.9rem, 1.8vw, 1.9rem);
   container-type: inline-size;
