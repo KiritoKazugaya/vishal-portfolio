@@ -1,0 +1,48 @@
+/*
+ * Sits between the hero and the first chapter, so it needs less vertical room
+ * than a chapter but enough that it does not read as the tail of the hero.
+ */
+.band {
+  position: relative;
+  padding-block: clamp(2.5rem, 7vh, 5rem);
+}
+
+/*
+ * Two hairlines rather than a card.
+ *
+ * A panel here would compete with the chapter scrims that start one screen
+ * later, and this is an aside, not a section. Rules give it a boundary without
+ * giving it a surface. They fade at both ends so they read as a length of trace
+ * rather than a border.
+ */
+.inner {
+  max-width: 62ch;
+  margin-inline: auto;
+  padding-block: clamp(1.25rem, 3vh, 2rem);
+  border-top: 1px solid transparent;
+  border-bottom: 1px solid transparent;
+  border-image: linear-gradient(
+      90deg,
+      transparent,
+      var(--color-edge) 18%,
+      var(--color-edge) 82%,
+      transparent
+    )
+    1;
+  text-align: center;
+}
+
+.eyebrow {
+  margin-bottom: clamp(0.6rem, 1.4vh, 0.9rem);
+}
+
+/*
+ * One flat colour. The gold ramp belongs to the headings; a caption that also
+ * shimmered would leave the page with no quiet type on it at all.
+ */
+.line {
+  color: var(--color-mute);
+  font-size: clamp(0.95rem, 1.15vw, 1.1rem);
+  line-height: 1.65;
+  text-wrap: pretty;
+}

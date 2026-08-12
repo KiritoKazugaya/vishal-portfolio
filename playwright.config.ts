@@ -33,7 +33,18 @@ export default defineConfig({
   webServer: {
     command: "npm run build && npm run start",
     url: "http://localhost:3000",
-    reuseExistingServer: !process.env.CI,
+    /*
+     * Never reuse. `reuseExistingServer: !process.env.CI` is the usual default
+     * and it silently defeats the point of this file: with a dev server already
+     * on 3000, the whole suite runs against `next dev` while claiming to test a
+     * production build. It cost a real debugging detour, where three tests
+     * failed with "element is not attached to the DOM" because dev-mode
+     * remounting was tearing the carousel out from under them.
+     *
+     * The cost is one build per run. If port 3000 is busy, Playwright now fails
+     * loudly instead of testing the wrong thing.
+     */
+    reuseExistingServer: false,
     timeout: 180_000,
   },
 })

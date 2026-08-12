@@ -6,6 +6,7 @@ import { About } from "@/components/sections/about"
 import { Contact } from "@/components/sections/contact"
 import { Experience } from "@/components/sections/experience"
 import { Hero } from "@/components/sections/hero"
+import { Legend } from "@/components/ui/legend"
 import { Projects } from "@/components/sections/projects"
 import { Skills } from "@/components/sections/skills"
 
@@ -29,6 +30,11 @@ export default function Home() {
 
       <main id="main" className="page-inset">
         <Hero />
+
+        {/* The key to the piece, at the one moment it is needed: the package has
+            just finished separating, and the first chapter has not yet filled
+            the first gap. */}
+        <Legend />
 
         {/* Chapters begin once the package has separated. Each maps to a slab. */}
         <div id="chapters" className="relative">
